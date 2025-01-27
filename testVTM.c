@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/sysinfo.h>
 #include <sys/utsname.h>
 
@@ -19,6 +20,19 @@ int main() {
     printf("Memory unit size in byte: %d\n", info.mem_unit);
     printf("Number of current processes: %d\n", info.procs);
     printf("Available high memory size: %ld\n", info.freehigh);
+
+    FILE* read_file;
+    char line[256];
+    read_file = fopen("/proc/cpuinfo", "r");
+    if(read_file == NULL) {
+	 perror("fopen");
+	 exit(1);
+    }
+    printf("File read successful!\n");
+    while(fgets(line, 256, read_file) != NULL) {
+	    printf("%s\n", line);
+    }
+    return 0;
 }
 
 
