@@ -3,3 +3,5 @@ Memory utilization was calculated using <sys/sysinfo.h>, namely using variables 
 CPU utilization was calculated by going to /proc/stat and dividing the idle time by the total time of the CPU
 Number of CPUs was calculated by going to /sys/devices/system/cpu and iterating through the cpu0, cpu1, ..., 
 located there to find the max cpu number
+
+https://www.linuxhowtos.org/System/procstat.htm
