@@ -3,6 +3,7 @@
 #include <sys/sysinfo.h>
 #include <sys/utsname.h>
 #include <string.h>
+#include <unistd.h>
 
 int getNumCpus() {
 	FILE* read_file;
@@ -26,23 +27,43 @@ int getNumCpus() {
 	return num_cpu;
 }
 
+double getMemoryUsage(struct sysinfo* info) {
+	sysinfo(info);
+	long totalram = info->totalram;
+	long freeram = info->freeram;
+	
+    printf("total ram: %ld bytes\n", totalram);
+    printf("free ram: %ld bytes\n", freeram);
+
+	double memoryUsagePercentage = (1 - ((double)freeram / totalram)) * 100;
+	return memoryUsagePercentage;
+}
+
+double getCpuUsage() {
+	FILE* readFile;
+	readFile = fopen("/proc/stat", "r");
+	char* cpu;
+	int user, nice, system, idle, iowait, irq, softirq; 
+	fscanf(readFile, "%s %d %d %d %d %d %d %d", cpu, &user, &nice, &system,
+												&idle, &iowait, &irq, &softirq);
+	fclose(readFile);
+	int totalCpuTime = user + nice + system + idle + iowait + irq + softirq;
+	double cpuUsagePercentage = (1 - ((double)idle / totalCpuTime)) * 100;
+	return cpuUsagePercentage;
+}
+
 int main() {
     printf("HELLO WORLD\n");
     printf("Added sysinfo.h\n");
 
-    struct sysinfo info;
-    int success = sysinfo(&info);
-    printf("%d\n",success);
+    //printf("%d\n",success);
 
-    long totalram = info.totalram;
-    long freeram = info.freeram;
-    printf("total ram: %ld bytes\n", totalram);
-    printf("free ram: %ld bytes\n", freeram);
-    printf("percentage free ram: %f\n", (double) freeram/totalram);
-    printf("percentage ram used: %f\n",(double) (totalram-freeram)/totalram);
-    printf("Memory unit size in byte: %d\n", info.mem_unit);
-    printf("Number of current processes: %d\n", info.procs);
-    printf("Available high memory size: %ld\n", info.freehigh);
+    //long totalram = info.totalram;
+    //long freeram = info.freeram;
+    //printf("percentage ram used: %f\n",(double) (totalram-freeram)/totalram);
+    //printf("Memory unit size in byte: %d\n", info.mem_unit);
+    //printf("Number of current processes: %d\n", info.procs);
+    //printf("Available high memory size: %ld\n", info.freehigh);
 
     //FILE* read_file;
     //char line[256];
@@ -56,7 +77,10 @@ int main() {
     //        printf("%s\n", line);
     //}
 	printf("%d\n", getNumCpus());
+    struct sysinfo info;
+    int success = sysinfo(&info);
+	printf("Memory Usage: %.2f%%\n", getMemoryUsage(&info));
+	printf("CPU Usage: %.2f%%\n", getCpuUsage());
     return 0;
 }
-
 
