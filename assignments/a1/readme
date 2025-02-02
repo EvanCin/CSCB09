@@ -1,0 +1,5 @@
+How the program was written:
+Memory utilization was calculated using <sys/sysinfo.h>, namely using variables totalram and freeram of struct sysinfo
+CPU utilization was calculated by going to /proc/stat and dividing the idle time by the total time of the CPU
+Number of CPUs was calculated by going to /sys/devices/system/cpu and iterating through the cpu0, cpu1, ..., 
+located there to find the max cpu number
