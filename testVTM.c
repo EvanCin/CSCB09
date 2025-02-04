@@ -29,14 +29,14 @@ int getNumCpus() {
 
 double getMemoryUsage(struct sysinfo* info) {
 	sysinfo(info);
-	long totalram = info->totalram;
-	long freeram = info->freeram;
-	
-    printf("total ram: %ld bytes\n", totalram);
-    printf("free ram: %ld bytes\n", freeram);
+	long totalRam = info->totalram;
+	long freeRam = info->freeram;
+	long usedRam = totalRam - freeRam;
+    //printf("total ram: %ld bytes\n", totalram);
+    //printf("free ram: %ld bytes\n", freeram);
 
-	double memoryUsagePercentage = (1 - ((double)freeram / totalram)) * 100;
-	return memoryUsagePercentage;
+	double memoryUsageGB = (double) usedRam / 1000000000;
+	return memoryUsageGB;
 }
 
 double getCpuUsage() {
@@ -52,19 +52,35 @@ double getCpuUsage() {
 	return cpuUsagePercentage;
 }
 
-int main() {
-    printf("HELLO WORLD\n");
-    printf("Added sysinfo.h\n");
+void displayParameters(int samples, int microsecondsTdelay) {
+	double secondsTdelay = (double) microsecondsTdelay / 1000000;
+	printf("Nbr of samples: %d -- every %d microSecs (%.3f secs)\n\n", samples, microsecondsTdelay, secondsTdelay);
+}
 
-    //printf("%d\n",success);
+void displayMemoryGraph(long totalRam, int samples) {
+	double totalRamGB = (double) totalRam / 1000000000;
+	printf("%.f GB ", totalRamGB);
+	
+	int row = 4;	
+	int col = 7;
+	for(row; row < 16; row++) {
+		printf("\x1b[%d;%df", row, col);
+		printf("|");
+	}
+	col = 2;
+	printf("\x1b[%d;%df", row, col);
+	printf("0 GB ");
+	for(int i = 0; i < samples+1; i++) {
+		printf("─");
+	}
+}
 
-    //long totalram = info.totalram;
-    //long freeram = info.freeram;
-    //printf("percentage ram used: %f\n",(double) (totalram-freeram)/totalram);
-    //printf("Memory unit size in byte: %d\n", info.mem_unit);
-    //printf("Number of current processes: %d\n", info.procs);
-    //printf("Available high memory size: %ld\n", info.freehigh);
-
+void updateMemoryGraph(double memoryPerBar, double usedRamGB, int currCol) {
+	int currRow = (int) (usedRamGB / memoryPerBar);
+	printf("\x1b[%d;%df", 8 - currRow, 8 + currCol);
+	printf("#");
+}
+int main(int argc, int** argv) {
     //FILE* read_file;
     //char line[256];
     //read_file = fopen("/proc/cpuinfo", "r");
@@ -76,11 +92,34 @@ int main() {
     //while(fgets(line, 256, read_file) != NULL) {
     //        printf("%s\n", line);
     //}
-	printf("%d\n", getNumCpus());
+
+	int samples = 20;
+	int tdelay = 500000;
+	//clear screen
+	printf("\033[2J");
+	//position cursor at top left
+	printf("\033[H");
+	//No arguments so present all information
+	if(argc == 1) {
+		displayParameters(samples, tdelay);
+	//	displayMemoryGraph();
+	}
+
     struct sysinfo info;
     int success = sysinfo(&info);
-	printf("Memory Usage: %.2f%%\n", getMemoryUsage(&info));
-	printf("CPU Usage: %.2f%%\n", getCpuUsage());
+	//printf("Memory Usage: %.2f%%\n", getMemoryUsage(&info));
+	printf("v Memory  %.2f\n", getMemoryUsage(&info)); 
+	long totalram = info.totalram;
+	displayMemoryGraph(totalram, samples);
+	double memoryPerBar = (double) totalram / 12;
+	for(int i = 0; i < 5; i++) {
+		double usedRamGB = getMemoryUsage(&info);
+		updateMemoryGraph(memoryPerBar, usedRamGB, i); 
+		sleep(0.5);
+	}
+	//printf("%d\n", getNumCpus());
+	//printf("CPU Usage: %.2f%%\n", getCpuUsage());
+	printf("\n");
     return 0;
 }
 
