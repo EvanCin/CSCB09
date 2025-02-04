@@ -75,7 +75,7 @@ void displayMemoryGraph(long totalRam, int samples) {
 	}
 }
 
-void updateMemoryGraph(double memoryPerBar, double usedRamGB, int currCol) {
+void updateMemoryGraph(double memoryPerBar, double usedRamGB, int currCol, int tdelay) {
 	int currRow = (int) (usedRamGB / memoryPerBar);
 	printf("\x1b[%d;%df", 8 - currRow, 8 + currCol);
 	printf("#");
@@ -113,13 +113,16 @@ int main(int argc, int** argv) {
 	displayMemoryGraph(totalram, samples);
 	double memoryPerBar = (double) totalram / 12;
 	for(int i = 0; i < 5; i++) {
-		double usedRamGB = getMemoryUsage(&info);
-		updateMemoryGraph(memoryPerBar, usedRamGB, i); 
-		sleep(0.5);
+		//double usedRamGB = getMemoryUsage(&info);
+	   	updateMemoryGraph(memoryPerBar, 2, i, tdelay);
+		printf("\n");
+		usleep(500000);
 	}
 	//printf("%d\n", getNumCpus());
 	//printf("CPU Usage: %.2f%%\n", getCpuUsage());
 	printf("\n");
+
+	printf("\x1b[%d;%df", 32, 1);
     return 0;
 }
 
