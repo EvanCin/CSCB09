@@ -17,7 +17,6 @@ int getNumCpus() {
 	strncat(file_path, str_num_cpu, 32);
 	read_file = fopen(file_path, "r");
 	while(read_file != NULL) {
-		printf("Current cpu: %d\n",num_cpu);
 		fclose(read_file);
 		num_cpu++;
 		sprintf(str_num_cpu, "%d", num_cpu);
@@ -26,6 +25,18 @@ int getNumCpus() {
 		read_file = fopen(file_path, "r");
 	}
 	return num_cpu;
+}
+
+double getMaxFreq() {
+	FILE* readFile;
+	readFile = fopen("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", "r");
+	if(readFile == NULL) {
+		perror("Could not read /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq");
+		exit(1);
+	}
+	double maxFreqGhz;
+	fscanf(readFile, "%lf", &maxFreqGhz);
+	return maxFreqGhz /= 1000000;
 }
 
 double getMemoryUsage(struct sysinfo* info) {
@@ -41,11 +52,12 @@ double getMemoryUsage(struct sysinfo* info) {
 }
 
 double getCpuUsage() {
+	//**** Update this function according to piazza post ****
 	FILE* readFile;
 	readFile = fopen("/proc/stat", "r");
 	if(readFile == NULL) {
 		perror("Could not open /proc/stat");
-		return -1;
+		exit(1);
 	}
 	char cpu[8];
 	int user, nice, system, idle, iowait, irq, softirq; 
@@ -111,7 +123,7 @@ void updateMemoryGraph(double memoryPerBar, double usedRamGB, int currCol) {
 
 void updateCPUGraph(double cpuUsage, int currCol) {
 	printf("\x1b[%d;%df%.2f", 18, 8, cpuUsage);
-	int currRow = (int) (cpuUsage / 10); //Couldnt get ceil to work here for some reason
+	int currRow = (int) cpuUsage / 10; //Couldnt get ceil to work here for some reason
 	printf("\x1b[%d;%df", 28 - currRow, 9 + currCol);
 	printf(":\n");
 }
@@ -153,9 +165,9 @@ int main(int argc, char** argv) {
 		double usedRamGB = getMemoryUsage(&info);
 	   	updateMemoryGraph(memoryPerBar, usedRamGB, i);
 		updateCPUGraph(getCpuUsage(), i);
-		usleep(1000000);
+		usleep(200000);
 	}
-	//printf("%d\n", getNumCpus());
+	printf("%d\n", getNumCpus());
 	printf("\n");
 
 	printf("\x1b[%d;%df", 32, 1);
