@@ -1,3 +1,4 @@
+#define _DEFAULT_SOURCE //For unistd.h and usleep()
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -51,7 +52,7 @@ double getMemoryUsage(struct sysinfo* info) {
 	return memoryUsageGB;
 }
 
-double getCpuUsage() {
+double getCpuUsage(float* prevTotalCpuTime, float* prevIdleTime) {
 	//**** Update this function according to piazza post ****
 	FILE* readFile;
 	readFile = fopen("/proc/stat", "r");
@@ -60,12 +61,20 @@ double getCpuUsage() {
 		exit(1);
 	}
 	char cpu[8];
-	int user, nice, system, idle, iowait, irq, softirq; 
-	fscanf(readFile, "%s %d %d %d %d %d %d %d", cpu, &user, &nice, &system,
-												&idle, &iowait, &irq, &softirq);
+	float user, nice, system, currIdleTime, iowait, irq, softirq; 
+	fscanf(readFile, "%s %e %e %e %e %e %e %e", cpu, &user, &nice, &system,
+												&currIdleTime, &iowait, &irq, &softirq);
 	fclose(readFile);
-	int totalCpuTime = user + nice + system + idle + iowait + irq + softirq;
-	double cpuUsagePercentage = (1 - ((double)idle / totalCpuTime)) * 100;
+	float currTotalCpuTime = user + nice + system + currIdleTime + iowait + irq + softirq;
+
+	float updatedTotalCpuTime = currTotalCpuTime - *prevTotalCpuTime;
+	float updatedIdleCpuTime = currIdleTime - *prevIdleTime;
+	*prevTotalCpuTime = currTotalCpuTime;
+	*prevIdleTime = currIdleTime;
+
+	double cpuUsagePercentage = (1 - ((double)updatedIdleCpuTime / updatedTotalCpuTime)) * 100;
+	// printf("IDLE: %f\n", idle);
+	// printf("TOTAL CPUTIME: %f\n", totalCpuTime);
 	return cpuUsagePercentage;
 }
 
@@ -93,11 +102,11 @@ void displayMemoryGraph(long totalRam, int samples) {
 	}
 }
 
-void displayCPUGraph(double cpuUsage, int samples) {
+void displayCPUGraph(int samples) {
 	int row = 18;
 	int col = 1;
 	printf("\x1b[%d;%df", row, col);
-	printf("v CPU  %.2f %%\n", cpuUsage);
+	printf("v CPU    %%\n");
 	printf("  100%% ");
 	row += 1;
 	col += 7;
@@ -114,21 +123,58 @@ void displayCPUGraph(double cpuUsage, int samples) {
 	}
 }
 
-void updateMemoryGraph(double memoryPerBar, double usedRamGB, int currCol) {
+void printCores(int numCores) {
+	for(int i = 0; i < numCores; i++) {
+		printf("+──+  ");
+	}
+	printf("\n");
+	for(int i = 0; i < numCores; i++) {
+		printf("|  |  ");
+	}
+	printf("\n");
+	for(int i = 0; i < numCores; i++) {
+		printf("+──+  ");
+	}
+	printf("\n");
+}
+
+void displayCoreInfo() {
+	int numCpus = getNumCpus();
+	printf("\x1b[%d;%df", 32, 1);
+	printf("v Number of Cores: %d @ %.2f GHz\n", numCpus, getMaxFreq());
+	int rowsToPrint = numCpus / 4;
+	int cpusToPrint = numCpus % 4;
+	for(int r = 0; r < rowsToPrint; r++) {
+		printCores(4);
+		printf("\n");
+	}
+	printCores(cpusToPrint);
+}
+
+void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol) {
 	printf("\x1b[%d;%df%.2f", 3, 11, usedRamGB);
-	int currRow = (int) (usedRamGB / memoryPerBar);
-	printf("\x1b[%d;%df", 8 - currRow, 9 + currCol);
-	printf("#\n");
+	int currRow = ((int) (usedRamGB / memoryPerBarGB));
+	printf("CURR ROW: %d ", currRow);
+	// printf("\x1b[%d;%df", 8 - currRow, 9 + currCol);
+	// printf("#\n");
 }
 
 void updateCPUGraph(double cpuUsage, int currCol) {
 	printf("\x1b[%d;%df%.2f", 18, 8, cpuUsage);
-	int currRow = (int) cpuUsage / 10; //Couldnt get ceil to work here for some reason
+	// int currRow = (int) (cpuUsage / 10); //Couldnt get ceil to work here for some reason
+	int currRow = (int) (cpuUsage /10);
+	if(currRow == 10) {
+		currRow--;
+	}else if(currRow < 0) {
+		currRow = 0;
+	}
 	printf("\x1b[%d;%df", 28 - currRow, 9 + currCol);
 	printf(":\n");
 }
 
 int main(int argc, char** argv) {
+	float prevTotalCpuTime = 0;
+	float prevIdleTime = 0;
     //FILE* read_file;
     //char line[256];
     //read_file = fopen("/proc/cpuinfo", "r");
@@ -158,19 +204,20 @@ int main(int argc, char** argv) {
 	//printf("Memory Usage: %.2f%%\n", getMemoryUsage(&info));
 	printf("v Memory  %.2f GB\n", getMemoryUsage(&info)); 
 	long totalram = info.totalram;
+	int totalRamGB = totalram / 1000000000;
 	displayMemoryGraph(totalram, samples);
-	displayCPUGraph(getCpuUsage(), samples);
-	double memoryPerBar = (double) totalram / 12;
+	displayCPUGraph(samples);
+	double memoryPerBarGB = (double) totalRamGB / 12;
 	for(int i = 0; i < samples; i++) {
 		double usedRamGB = getMemoryUsage(&info);
-	   	updateMemoryGraph(memoryPerBar, usedRamGB, i);
-		updateCPUGraph(getCpuUsage(), i);
-		usleep(200000);
+	   	updateMemoryGraph(memoryPerBarGB, usedRamGB, i);
+		updateCPUGraph(getCpuUsage(&prevTotalCpuTime, &prevIdleTime), i);
+		//printf("%.10f ", getCpuUsage(&prevTotalCpuTime, &prevIdleTime));
+		usleep(2000000);
 	}
 //	printf("%d\n", getNumCpus());
-	printf("\n");
-
-	printf("\x1b[%d;%df", 32, 1);
+	displayCoreInfo();
+	// printf("\x1b[%d;%df", 40, 1);
+	printf("\033[%dB", 2);
     return 0;
 }
-
