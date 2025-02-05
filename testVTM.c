@@ -154,15 +154,17 @@ void displayCoreInfo() {
 void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol) {
 	printf("\x1b[%d;%df%.2f", 3, 11, usedRamGB);
 	int currRow = ((int) (usedRamGB / memoryPerBarGB));
-	printf("CURR ROW: %d ", currRow);
-	// printf("\x1b[%d;%df", 8 - currRow, 9 + currCol);
-	// printf("#\n");
+	printf("\x1b[%d;%df", 16 - currRow, 9 + currCol);
+	printf("#\n");
 }
 
 void updateCPUGraph(double cpuUsage, int currCol) {
+	if(cpuUsage < 0) {
+		cpuUsage = 0;
+	}
 	printf("\x1b[%d;%df%.2f", 18, 8, cpuUsage);
 	// int currRow = (int) (cpuUsage / 10); //Couldnt get ceil to work here for some reason
-	int currRow = (int) (cpuUsage /10);
+	int currRow = (int) (cpuUsage / 10);
 	if(currRow == 10) {
 		currRow--;
 	}else if(currRow < 0) {
@@ -170,6 +172,27 @@ void updateCPUGraph(double cpuUsage, int currCol) {
 	}
 	printf("\x1b[%d;%df", 28 - currRow, 9 + currCol);
 	printf(":\n");
+}
+
+//Returns 1 if valid input and update successful, -1 otherwise
+int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCPU, bool* displayCore, char* input) {
+	if(strcmp(input, "--memory") == 0) {
+		*displayMemory = true;
+		return 1;
+	} else if(strcmp(input, "--cpu") == 0) {
+		*displayCPU = true;
+		return 1;
+	} else if(strcmp(input, "--cores") == 0) {
+		*displayCore = true;
+		return 1;
+	}
+
+	
+	return -1;
+}
+
+bool isNumber(char* str) {
+
 }
 
 int main(int argc, char** argv) {
@@ -187,8 +210,14 @@ int main(int argc, char** argv) {
     //        printf("%s\n", line);
     //}
 
+	//Default values
 	int samples = 20;
 	int tdelay = 500000;
+	//Variables to check what info to display
+	bool displayMemory = false;
+	bool displayCPU = false;
+	bool displayCore = false;
+
 	//clear screen
 	printf("\033[2J");
 	//position cursor at top left
@@ -196,28 +225,36 @@ int main(int argc, char** argv) {
 	//No arguments so present all information
 	if(argc == 1) {
 		displayParameters(samples, tdelay);
-	//	displayMemoryGraph();
+		//<-- Display all info and return-->
+	}
+	if(argc > 6) {
+		printf("Too many arguments\n");
+		exit(1);
+	}
+	for(int i = 2; i < argc; i++) {
+		//Check wether if theres positional arguments
+		//Need a function to check if argv[1] and/or argv[2] is a number
 	}
 
-    struct sysinfo info;
-    int success = sysinfo(&info);
-	//printf("Memory Usage: %.2f%%\n", getMemoryUsage(&info));
-	printf("v Memory  %.2f GB\n", getMemoryUsage(&info)); 
-	long totalram = info.totalram;
-	int totalRamGB = totalram / 1000000000;
-	displayMemoryGraph(totalram, samples);
-	displayCPUGraph(samples);
-	double memoryPerBarGB = (double) totalRamGB / 12;
-	for(int i = 0; i < samples; i++) {
-		double usedRamGB = getMemoryUsage(&info);
-	   	updateMemoryGraph(memoryPerBarGB, usedRamGB, i);
-		updateCPUGraph(getCpuUsage(&prevTotalCpuTime, &prevIdleTime), i);
-		//printf("%.10f ", getCpuUsage(&prevTotalCpuTime, &prevIdleTime));
-		usleep(2000000);
-	}
-//	printf("%d\n", getNumCpus());
-	displayCoreInfo();
-	// printf("\x1b[%d;%df", 40, 1);
-	printf("\033[%dB", 2);
+//     struct sysinfo info;
+//     int success = sysinfo(&info);
+// 	//printf("Memory Usage: %.2f%%\n", getMemoryUsage(&info));
+// 	printf("v Memory  %.2f GB\n", getMemoryUsage(&info)); 
+// 	long totalram = info.totalram;
+// 	int totalRamGB = totalram / 1000000000;
+// 	displayMemoryGraph(totalram, samples);
+// 	displayCPUGraph(samples);
+// 	double memoryPerBarGB = (double) totalRamGB / 12;
+// 	for(int i = 0; i < samples; i++) {
+// 		double usedRamGB = getMemoryUsage(&info);
+// 	   	updateMemoryGraph(memoryPerBarGB, usedRamGB, i);
+// 		updateCPUGraph(getCpuUsage(&prevTotalCpuTime, &prevIdleTime), i);
+// 		//printf("%.10f ", getCpuUsage(&prevTotalCpuTime, &prevIdleTime));
+// 		usleep(2000000);
+// 	}
+// //	printf("%d\n", getNumCpus());
+// 	displayCoreInfo();
+// 	// printf("\x1b[%d;%df", 40, 1);
+// 	printf("\033[%dB", 2);
     return 0;
 }
