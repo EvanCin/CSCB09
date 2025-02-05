@@ -167,7 +167,7 @@ int main(int argc, char** argv) {
 		updateCPUGraph(getCpuUsage(), i);
 		usleep(200000);
 	}
-	printf("%d\n", getNumCpus());
+//	printf("%d\n", getNumCpus());
 	printf("\n");
 
 	printf("\x1b[%d;%df", 32, 1);
