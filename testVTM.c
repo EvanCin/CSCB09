@@ -6,6 +6,8 @@
 #include <sys/utsname.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
+#include <ctype.h>
 
 int getNumCpus() {
 	FILE* read_file;
@@ -174,6 +176,15 @@ void updateCPUGraph(double cpuUsage, int currCol) {
 	printf(":\n");
 }
 
+bool isNumber(const char* str) {
+	for(int i = 0; str[i] != '\0'; i++) {
+		if(!isdigit(str[i])) {
+			return false;
+		}
+	}
+	return true;
+}
+
 //Returns 1 if valid input and update successful, -1 otherwise
 int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCPU, bool* displayCore, char* input) {
 	if(strcmp(input, "--memory") == 0) {
@@ -186,14 +197,39 @@ int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCP
 		*displayCore = true;
 		return 1;
 	}
-
+	int strlen = 0;
+	int startOfNum = 0;
+	while(input[strlen] != '\0') {
+		if(input[strlen] == '=') {
+			startOfNum = strlen + 1;
+		}
+		strlen++;
+	}
+	printf("startofnum: %d ", startOfNum);
+	char secondHalfInput[strlen];
+	int inputNum;
+	strncpy(secondHalfInput, input+startOfNum, strlen);
+	if(!isNumber(secondHalfInput)) {
+		return -1;
+	} else {
+		inputNum = atoi(secondHalfInput);
+	}
+	char firstHalfInput[strlen];
+	strcpy(firstHalfInput, input);
+	firstHalfInput[startOfNum-1] = '\0';
+	printf("[%s ]", firstHalfInput);
+	if(strcmp(firstHalfInput, "--samples") == 0) {
+		*samples = inputNum;
+		return 1;
+	} else if(strcmp(firstHalfInput, "--tdelay") == 0) {
+		*tdelay = inputNum;
+		return 1;
+	}
+	
 	
 	return -1;
 }
 
-bool isNumber(char* str) {
-
-}
 
 int main(int argc, char** argv) {
 	float prevTotalCpuTime = 0;
@@ -217,6 +253,7 @@ int main(int argc, char** argv) {
 	bool displayMemory = false;
 	bool displayCPU = false;
 	bool displayCore = false;
+	int updateVal;	
 
 	//clear screen
 	printf("\033[2J");
@@ -226,16 +263,40 @@ int main(int argc, char** argv) {
 	if(argc == 1) {
 		displayParameters(samples, tdelay);
 		//<-- Display all info and return-->
+
+		return 0;
+	}
+	if(argc == 2) {
+		if(isNumber(argv[1])) {
+			samples = atoi(argv[1]);
+		} else {
+			updateVal = updateValues(&samples, &tdelay, &displayMemory, &displayCPU, &displayCore, argv[1]);
+			if(updateVal == -1) {
+				printf("Wrong arguments. Syntax: ./myMonitoringTool  [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T]");
+				exit(1);
+			}
+		}
+		
+		printf("Success!");
+		return 0;
 	}
 	if(argc > 6) {
 		printf("Too many arguments\n");
 		exit(1);
 	}
-	for(int i = 2; i < argc; i++) {
+	
+	for(int i = 1; i < argc; i++) {
 		//Check wether if theres positional arguments
 		//Need a function to check if argv[1] and/or argv[2] is a number
+		if(isNumber(argv[i]) && i == 1) {
+			samples = atoi(argv[i]);
+			printf("samples: %d\n", samples);
+			if(isNumber(argv[2])) {
+				tdelay = atoi(argv[2]);
+				printf("delay: %d\n", tdelay);
+			}
+		}
 	}
-
 //     struct sysinfo info;
 //     int success = sysinfo(&info);
 // 	//printf("Memory Usage: %.2f%%\n", getMemoryUsage(&info));
