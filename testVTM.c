@@ -86,7 +86,7 @@ void displayMemoryGraph(long totalRam, int samples, int outputRow) {
 	outputRow++;
 	col++;
 	printf("\x1b[%d;%df", outputRow, col);
-	printf(" %.f GB ", totalRamGB);
+	printf("%.f GB ", totalRamGB);
 	col = 8;
 	while(outputRow < 16) {
 		printf("\x1b[%d;%df", outputRow, col);
@@ -95,7 +95,7 @@ void displayMemoryGraph(long totalRam, int samples, int outputRow) {
 	}
 	col = 2;
 	printf("\x1b[%d;%df", outputRow, col);
-	printf("0 GB  ");
+	printf(" 0 GB ");
 	for(int i = 0; i < samples+1; i++) {
 		printf("─");
 	}
