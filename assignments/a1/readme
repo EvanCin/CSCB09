@@ -11,3 +11,12 @@ Max frequency was calculated by going to /sys/devices/system/cpu/cpu0/cpufreq/cp
 
 For using usleep()
 https://stackoverflow.com/questions/10053788/implicit-declaration-of-function-usleep
+
+
+How To Use Program:
+1. gcc myMonitoringTool -std=c99 -Wall -Werror -o myMonitoringTool
+2. ./myMonitoringTool  [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T]
+Notes
+Same arguments can be used. ie ./myMonitoringTool --cpu --cpu
+The leftmost values will be used. ie ./myMonitoringTool 20 --samples=30 will run the program with samples = 30
+Another example, ./myMonitoringTool --tdelay=2000 --tdelay=1000 will run the program with tdelay = 1000
