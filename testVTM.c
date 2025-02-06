@@ -52,7 +52,6 @@ double getMemoryUsage(struct sysinfo* info) {
 }
 
 double getCpuUsage(double* prevTotalCpuTime, double* prevIdleTime) {
-	//**** Update this function according to piazza post ****
 	FILE* readFile;
 	readFile = fopen("/proc/stat", "r");
 	if(readFile == NULL) {
@@ -102,7 +101,6 @@ void displayMemoryGraph(long totalRam, int samples, int outputRow) {
 }
 
 void displayCPUGraph(int samples, int outputRow) {
-	//int row = 18;
 	int col = 1;
 	printf("\x1b[%d;%df", outputRow, col);
 	printf("v CPU        %%\n");
@@ -229,6 +227,7 @@ int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCP
 void displayGraphs(int samples, int tdelay, bool displayMemory, bool displayCPU, int memoryOutputRow, int cpuOutputRow) {
 	double prevTotalCpuTime = 0;
 	double prevIdleTime = 0;
+	getCpuUsage(&prevTotalCpuTime, &prevIdleTime);
 	struct sysinfo info;
     sysinfo(&info);
  	long totalram = info.totalram;
