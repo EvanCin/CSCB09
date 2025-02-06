@@ -85,40 +85,45 @@ void displayParameters(int samples, int microsecondsTdelay) {
 	printf("Nbr of samples: %d -- every %d microSecs (%.3f secs)\n\n", samples, microsecondsTdelay, secondsTdelay);
 }
 
-void displayMemoryGraph(long totalRam, int samples) {
+void displayMemoryGraph(long totalRam, int samples, int outputRow) {
+	int col = 1;
 	double totalRamGB = (double) totalRam / 1000000000;
+	printf("\x1b[%d;%df", outputRow, col);
+	printf("v Memory        GB");
+	outputRow++;
+	col++;
+	printf("\x1b[%d;%df", outputRow, col);
 	printf(" %.f GB ", totalRamGB);
-	
-	int row = 4;	
-	int col = 8;
-	while(row < 16) {
-		printf("\x1b[%d;%df", row, col);
+	col = 8;
+	while(outputRow < 16) {
+		printf("\x1b[%d;%df", outputRow, col);
 		printf("|");
-		row++;
+		outputRow++;
 	}
 	col = 2;
-	printf("\x1b[%d;%df", row, col);
+	printf("\x1b[%d;%df", outputRow, col);
 	printf("0 GB  ");
 	for(int i = 0; i < samples+1; i++) {
 		printf("─");
 	}
 }
 
-void displayCPUGraph(int samples) {
-	int row = 18;
+void displayCPUGraph(int samples, int outputRow) {
+	//int row = 18;
 	int col = 1;
-	printf("\x1b[%d;%df", row, col);
-	printf("v CPU    %%\n");
+	printf("\x1b[%d;%df", outputRow, col);
+	printf("v CPU     %%\n");
 	printf("  100%% ");
-	row += 1;
+	outputRow += 1;
 	col += 7;
-	while(row < 29) {
-		printf("\x1b[%d;%df", row, col);
+	int rowsToPrint = outputRow+10;
+	while(outputRow < rowsToPrint) {
+		printf("\x1b[%d;%df", outputRow, col);
 		printf("|");
-		row++;
+		outputRow++;
 	}
 	col = 5;
-	printf("\x1b[%d;%df", row, col);
+	printf("\x1b[%d;%df", outputRow, col);
 	printf("0%% ");
 	for(int i = 0; i < samples+1; i++) {
 		printf("─");
@@ -140,9 +145,9 @@ void printCores(int numCores) {
 	printf("\n");
 }
 
-void displayCoreInfo() {
+void displayCoreInfo(int outputRow) {
 	int numCpus = getNumCpus();
-	printf("\x1b[%d;%df", 32, 1);
+	printf("\x1b[%d;%df", outputRow, 1);
 	printf("v Number of Cores: %d @ %.2f GHz\n", numCpus, getMaxFreq());
 	int rowsToPrint = numCpus / 4;
 	int cpusToPrint = numCpus % 4;
@@ -153,18 +158,21 @@ void displayCoreInfo() {
 	printCores(cpusToPrint);
 }
 
-void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol) {
-	printf("\x1b[%d;%df%.2f", 3, 11, usedRamGB);
+void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol, int outputRow) {
+	printf("\x1b[%d;%df%.2f", outputRow, 11, usedRamGB);
+	outputRow += 13;
 	int currRow = ((int) (usedRamGB / memoryPerBarGB));
-	printf("\x1b[%d;%df", 16 - currRow, 9 + currCol);
+	//printf("\x1b[%d;%df", 16 - currRow, 9 + currCol);
+	printf("\x1b[%d;%df", outputRow - currRow, 9 + currCol);
 	printf("#\n");
 }
 
-void updateCPUGraph(double cpuUsage, int currCol) {
+void updateCPUGraph(double cpuUsage, int currCol, int outputRow) {
 	if(cpuUsage < 0) {
 		cpuUsage = 0;
 	}
-	printf("\x1b[%d;%df%.2f", 18, 8, cpuUsage);
+	printf("\x1b[%d;%df%.2f %%", outputRow, 8, cpuUsage);
+	outputRow += 10;
 	// int currRow = (int) (cpuUsage / 10); //Couldnt get ceil to work here for some reason
 	int currRow = (int) (cpuUsage / 10);
 	if(currRow == 10) {
@@ -172,7 +180,7 @@ void updateCPUGraph(double cpuUsage, int currCol) {
 	}else if(currRow < 0) {
 		currRow = 0;
 	}
-	printf("\x1b[%d;%df", 28 - currRow, 9 + currCol);
+	printf("\x1b[%d;%df", outputRow - currRow, 9 + currCol);
 	printf(":\n");
 }
 
@@ -226,11 +234,62 @@ int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCP
 	return -1;
 }
 
-
-int main(int argc, char** argv) {
+void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool displayCPU, bool displayCore) {
 	float prevTotalCpuTime = 0;
 	float prevIdleTime = 0;
+	int memoryOutputRow = 3;
+	int cpuOutputRow;
+	int coreOutputRow;
+	//clear screen
+	printf("\033[2J");
+	//position cursor at top left
+	printf("\033[H");
+	displayParameters(samples, tdelay);
+	if(displayMemory) {
+		cpuOutputRow = 18;
+		coreOutputRow = 18;
+		if(displayCPU) {
+			coreOutputRow = 32;
+		}
+	} else if(displayCPU) {
+		cpuOutputRow = 3;
+		coreOutputRow = 18;
+	} else if(displayCore) {
+		coreOutputRow = 3;
+	}
+	
 
+	//Move this part to another function
+    struct sysinfo info;
+    int success = sysinfo(&info);
+ 	long totalram = info.totalram;
+ 	int totalRamGB = totalram / 1000000000;
+	if(displayMemory) {
+ 		displayMemoryGraph(totalram, samples, memoryOutputRow);
+	}
+	if(displayCPU) {
+ 		displayCPUGraph(samples, cpuOutputRow);
+	}
+ 	double memoryPerBarGB = (double) totalRamGB / 12;
+ 	for(int i = 0; i < samples; i++) {
+		if(displayMemory) {
+ 			double usedRamGB = getMemoryUsage(&info);
+ 	   		updateMemoryGraph(memoryPerBarGB, usedRamGB, i, memoryOutputRow);
+ 		}
+		if(displayCPU) {
+			updateCPUGraph(getCpuUsage(&prevTotalCpuTime, &prevIdleTime), i, cpuOutputRow);
+ 		}
+		//printf("%.10f ", getCpuUsage(&prevTotalCpuTime, &prevIdleTime));
+ 		usleep(tdelay);
+ 	}
+	if(displayCore) {
+		displayCoreInfo(coreOutputRow);
+	}
+	
+	printf("\x1b[%d;%df", 40, 1);
+}
+
+int main(int argc, char** argv) {
 	//Default values
 	int samples = 20;
 	int tdelay = 500000;
@@ -239,21 +298,22 @@ int main(int argc, char** argv) {
 	bool displayCPU = false;
 	bool displayCore = false;
 	int updateVal;	
-
-	//clear screen
-	printf("\033[2J");
-	//position cursor at top left
-	printf("\033[H");
 	//No arguments so present all information
 	if(argc == 1) {
 		displayParameters(samples, tdelay);
 		//<-- Display all info and return-->
-
+		displayMemory = true;
+		displayCPU = true;
+		displayCore = true;
+		displayRequestedInfo(samples, tdelay, displayMemory, displayCPU, displayCore);
 		return 0;
 	}
 	if(argc == 2) {
 		if(isNumber(argv[1])) {
 			samples = atoi(argv[1]);
+			displayMemory = true;
+			displayCPU = true;
+			displayCore = true;
 		} else {
 			updateVal = updateValues(&samples, &tdelay, &displayMemory, &displayCPU, &displayCore, argv[1]);
 			if(updateVal == -1) {
@@ -261,23 +321,15 @@ int main(int argc, char** argv) {
 				exit(1);
 			}
 		}
-		
-		printf("Success!");
+		displayRequestedInfo(samples, tdelay, displayMemory, displayCPU, displayCore);
 		return 0;
 	}
-	if(argc > 6) {
-		printf("Too many arguments\n");
-		exit(1);
-	}
 	int commandIndex = 1;
-	
 	if(isNumber(argv[1])) {
 		samples = atoi(argv[1]);
-		printf("samples: %d\n", samples);
 		commandIndex++;
 		if(isNumber(argv[2])) {
 			tdelay = atoi(argv[2]);
-			printf("delay: %d\n", tdelay);
 			commandIndex++;
 		}
 	}
@@ -290,25 +342,11 @@ int main(int argc, char** argv) {
 			exit(1);
 		}
 	}
-//     struct sysinfo info;
-//     int success = sysinfo(&info);
-// 	//printf("Memory Usage: %.2f%%\n", getMemoryUsage(&info));
-// 	printf("v Memory  %.2f GB\n", getMemoryUsage(&info)); 
-// 	long totalram = info.totalram;
-// 	int totalRamGB = totalram / 1000000000;
-// 	displayMemoryGraph(totalram, samples);
-// 	displayCPUGraph(samples);
-// 	double memoryPerBarGB = (double) totalRamGB / 12;
-// 	for(int i = 0; i < samples; i++) {
-// 		double usedRamGB = getMemoryUsage(&info);
-// 	   	updateMemoryGraph(memoryPerBarGB, usedRamGB, i);
-// 		updateCPUGraph(getCpuUsage(&prevTotalCpuTime, &prevIdleTime), i);
-// 		//printf("%.10f ", getCpuUsage(&prevTotalCpuTime, &prevIdleTime));
-// 		usleep(2000000);
-// 	}
-// //	printf("%d\n", getNumCpus());
-// 	displayCoreInfo();
-// 	// printf("\x1b[%d;%df", 40, 1);
-// 	printf("\033[%dB", 2);
+	if(!displayMemory && !displayCPU && !displayCore) {
+		displayMemory = true;
+		displayCPU = true;
+		displayCore = true;
+	}
+	displayRequestedInfo(samples, tdelay, displayMemory, displayCPU, displayCore);
     return 0;
 }
