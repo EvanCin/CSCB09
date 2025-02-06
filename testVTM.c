@@ -205,7 +205,6 @@ int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCP
 		}
 		strlen++;
 	}
-	printf("startofnum: %d ", startOfNum);
 	char secondHalfInput[strlen];
 	int inputNum;
 	strncpy(secondHalfInput, input+startOfNum, strlen);
@@ -217,7 +216,6 @@ int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCP
 	char firstHalfInput[strlen];
 	strcpy(firstHalfInput, input);
 	firstHalfInput[startOfNum-1] = '\0';
-	printf("[%s ]", firstHalfInput);
 	if(strcmp(firstHalfInput, "--samples") == 0) {
 		*samples = inputNum;
 		return 1;
@@ -225,8 +223,6 @@ int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCP
 		*tdelay = inputNum;
 		return 1;
 	}
-	
-	
 	return -1;
 }
 
@@ -234,17 +230,6 @@ int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCP
 int main(int argc, char** argv) {
 	float prevTotalCpuTime = 0;
 	float prevIdleTime = 0;
-    //FILE* read_file;
-    //char line[256];
-    //read_file = fopen("/proc/cpuinfo", "r");
-    //if(read_file == NULL) {
-    //     perror("fopen");
-    //     exit(1);
-    //}
-    //printf("File read successful!\n");
-    //while(fgets(line, 256, read_file) != NULL) {
-    //        printf("%s\n", line);
-    //}
 
 	//Default values
 	int samples = 20;
@@ -284,17 +269,25 @@ int main(int argc, char** argv) {
 		printf("Too many arguments\n");
 		exit(1);
 	}
+	int commandIndex = 1;
 	
-	for(int i = 1; i < argc; i++) {
+	if(isNumber(argv[1])) {
+		samples = atoi(argv[1]);
+		printf("samples: %d\n", samples);
+		commandIndex++;
+		if(isNumber(argv[2])) {
+			tdelay = atoi(argv[2]);
+			printf("delay: %d\n", tdelay);
+			commandIndex++;
+		}
+	}
+	for(int i = commandIndex; i < argc; i++) {
 		//Check wether if theres positional arguments
 		//Need a function to check if argv[1] and/or argv[2] is a number
-		if(isNumber(argv[i]) && i == 1) {
-			samples = atoi(argv[i]);
-			printf("samples: %d\n", samples);
-			if(isNumber(argv[2])) {
-				tdelay = atoi(argv[2]);
-				printf("delay: %d\n", tdelay);
-			}
+		updateVal = updateValues(&samples, &tdelay, &displayMemory, &displayCPU, &displayCore, argv[i]);
+		if(updateVal == -1) {
+			printf("Wrong arguments. Syntax: ./myMonitoringTool  [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T]");
+			exit(1);
 		}
 	}
 //     struct sysinfo info;
