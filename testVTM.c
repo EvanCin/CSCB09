@@ -47,9 +47,6 @@ double getMemoryUsage(struct sysinfo* info) {
 	long totalRam = info->totalram;
 	long freeRam = info->freeram;
 	long usedRam = totalRam - freeRam;
-    //printf("total ram: %ld bytes\n", totalram);
-    //printf("free ram: %ld bytes\n", freeram);
-
 	double memoryUsageGB = (double) usedRam / 1000000000;
 	return memoryUsageGB;
 }
@@ -68,15 +65,11 @@ double getCpuUsage(float* prevTotalCpuTime, float* prevIdleTime) {
 												&currIdleTime, &iowait, &irq, &softirq);
 	fclose(readFile);
 	float currTotalCpuTime = user + nice + system + currIdleTime + iowait + irq + softirq;
-
 	float updatedTotalCpuTime = currTotalCpuTime - *prevTotalCpuTime;
 	float updatedIdleCpuTime = currIdleTime - *prevIdleTime;
 	*prevTotalCpuTime = currTotalCpuTime;
 	*prevIdleTime = currIdleTime;
-
 	double cpuUsagePercentage = (1 - ((double)updatedIdleCpuTime / updatedTotalCpuTime)) * 100;
-	// printf("IDLE: %f\n", idle);
-	// printf("TOTAL CPUTIME: %f\n", totalCpuTime);
 	return cpuUsagePercentage;
 }
 
@@ -112,7 +105,7 @@ void displayCPUGraph(int samples, int outputRow) {
 	//int row = 18;
 	int col = 1;
 	printf("\x1b[%d;%df", outputRow, col);
-	printf("v CPU     %%\n");
+	printf("v CPU        %%\n");
 	printf("  100%% ");
 	outputRow += 1;
 	col += 7;
@@ -153,7 +146,6 @@ void displayCoreInfo(int outputRow) {
 	int cpusToPrint = numCpus % 4;
 	for(int r = 0; r < rowsToPrint; r++) {
 		printCores(4);
-		printf("\n");
 	}
 	printCores(cpusToPrint);
 }
@@ -171,11 +163,11 @@ void updateCPUGraph(double cpuUsage, int currCol, int outputRow) {
 	if(cpuUsage < 0) {
 		cpuUsage = 0;
 	}
-	printf("\x1b[%d;%df%.2f %%", outputRow, 8, cpuUsage);
+	printf("\x1b[%d;%df%.2f", outputRow, 8, cpuUsage);
 	outputRow += 10;
 	// int currRow = (int) (cpuUsage / 10); //Couldnt get ceil to work here for some reason
 	int currRow = (int) (cpuUsage / 10);
-	if(currRow == 10) {
+	if(currRow >= 10) {
 		currRow--;
 	}else if(currRow < 0) {
 		currRow = 0;
@@ -234,43 +226,20 @@ int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCP
 	return -1;
 }
 
-void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool displayCPU, bool displayCore) {
+void displayGraphs(int samples, int tdelay, bool displayMemory, bool displayCPU, int memoryOutputRow, int cpuOutputRow) {
 	float prevTotalCpuTime = 0;
 	float prevIdleTime = 0;
-	int memoryOutputRow = 3;
-	int cpuOutputRow;
-	int coreOutputRow;
-	//clear screen
-	printf("\033[2J");
-	//position cursor at top left
-	printf("\033[H");
-	displayParameters(samples, tdelay);
-	if(displayMemory) {
-		cpuOutputRow = 18;
-		coreOutputRow = 18;
-		if(displayCPU) {
-			coreOutputRow = 32;
-		}
-	} else if(displayCPU) {
-		cpuOutputRow = 3;
-		coreOutputRow = 18;
-	} else if(displayCore) {
-		coreOutputRow = 3;
-	}
-	
-
-	//Move this part to another function
-    struct sysinfo info;
-    int success = sysinfo(&info);
+	struct sysinfo info;
+    sysinfo(&info);
  	long totalram = info.totalram;
  	int totalRamGB = totalram / 1000000000;
+	double memoryPerBarGB = (double) totalRamGB / 12;
 	if(displayMemory) {
  		displayMemoryGraph(totalram, samples, memoryOutputRow);
 	}
 	if(displayCPU) {
  		displayCPUGraph(samples, cpuOutputRow);
 	}
- 	double memoryPerBarGB = (double) totalRamGB / 12;
  	for(int i = 0; i < samples; i++) {
 		if(displayMemory) {
  			double usedRamGB = getMemoryUsage(&info);
@@ -279,14 +248,54 @@ void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool disp
 		if(displayCPU) {
 			updateCPUGraph(getCpuUsage(&prevTotalCpuTime, &prevIdleTime), i, cpuOutputRow);
  		}
-		//printf("%.10f ", getCpuUsage(&prevTotalCpuTime, &prevIdleTime));
  		usleep(tdelay);
  	}
+}
+
+void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool displayCPU, bool displayCore) {
+	int memoryOutputRow = 3;
+	int cpuOutputRow;
+	int coreOutputRow;
+	int endOutputRow;
+	if(!displayMemory && !displayCPU && !displayCore) {
+		displayMemory = true;
+		displayCPU = true;
+		displayCore = true;
+	}
+	//clear screen
+	printf("\033[2J");
+	//position cursor at top left
+	printf("\033[H");
+	displayParameters(samples, tdelay);
+	if(displayMemory) {
+		cpuOutputRow = 18;
+		coreOutputRow = 18;
+		endOutputRow = 20;
+		if(displayCPU) {
+			coreOutputRow = 32;
+			endOutputRow = 40;
+		}
+		if(displayCore) {
+			endOutputRow = 40;
+		}
+	} else if(displayCPU) {
+		cpuOutputRow = 3;
+		coreOutputRow = 18;
+		endOutputRow = 20;
+		if(displayCore) {
+			endOutputRow = 40;
+		}
+	} else if(displayCore) {
+		coreOutputRow = 3;
+		endOutputRow = 20;
+	}
+	if(displayMemory || displayCPU) {
+		displayGraphs(samples, tdelay, displayMemory, displayCPU, memoryOutputRow, cpuOutputRow);
+	}
 	if(displayCore) {
 		displayCoreInfo(coreOutputRow);
 	}
-	
-	printf("\x1b[%d;%df", 40, 1);
+	printf("\x1b[%d;%df", endOutputRow, 1);
 }
 
 int main(int argc, char** argv) {
@@ -298,22 +307,14 @@ int main(int argc, char** argv) {
 	bool displayCPU = false;
 	bool displayCore = false;
 	int updateVal;	
-	//No arguments so present all information
 	if(argc == 1) {
 		displayParameters(samples, tdelay);
-		//<-- Display all info and return-->
-		displayMemory = true;
-		displayCPU = true;
-		displayCore = true;
 		displayRequestedInfo(samples, tdelay, displayMemory, displayCPU, displayCore);
 		return 0;
 	}
 	if(argc == 2) {
 		if(isNumber(argv[1])) {
 			samples = atoi(argv[1]);
-			displayMemory = true;
-			displayCPU = true;
-			displayCore = true;
 		} else {
 			updateVal = updateValues(&samples, &tdelay, &displayMemory, &displayCPU, &displayCore, argv[1]);
 			if(updateVal == -1) {
@@ -334,18 +335,11 @@ int main(int argc, char** argv) {
 		}
 	}
 	for(int i = commandIndex; i < argc; i++) {
-		//Check wether if theres positional arguments
-		//Need a function to check if argv[1] and/or argv[2] is a number
 		updateVal = updateValues(&samples, &tdelay, &displayMemory, &displayCPU, &displayCore, argv[i]);
 		if(updateVal == -1) {
 			printf("Wrong arguments. Syntax: ./myMonitoringTool  [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T]");
 			exit(1);
 		}
-	}
-	if(!displayMemory && !displayCPU && !displayCore) {
-		displayMemory = true;
-		displayCPU = true;
-		displayCore = true;
 	}
 	displayRequestedInfo(samples, tdelay, displayMemory, displayCPU, displayCore);
     return 0;
