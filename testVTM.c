@@ -51,7 +51,7 @@ double getMemoryUsage(struct sysinfo* info) {
 	return memoryUsageGB;
 }
 
-double getCpuUsage(float* prevTotalCpuTime, float* prevIdleTime) {
+double getCpuUsage(double* prevTotalCpuTime, double* prevIdleTime) {
 	//**** Update this function according to piazza post ****
 	FILE* readFile;
 	readFile = fopen("/proc/stat", "r");
@@ -60,13 +60,13 @@ double getCpuUsage(float* prevTotalCpuTime, float* prevIdleTime) {
 		exit(1);
 	}
 	char cpu[8];
-	float user, nice, system, currIdleTime, iowait, irq, softirq; 
-	fscanf(readFile, "%s %e %e %e %e %e %e %e", cpu, &user, &nice, &system,
+	double user, nice, system, currIdleTime, iowait, irq, softirq; 
+	fscanf(readFile, "%s %le %le %le %le %le %le %le", cpu, &user, &nice, &system,
 												&currIdleTime, &iowait, &irq, &softirq);
 	fclose(readFile);
-	float currTotalCpuTime = user + nice + system + currIdleTime + iowait + irq + softirq;
-	float updatedTotalCpuTime = currTotalCpuTime - *prevTotalCpuTime;
-	float updatedIdleCpuTime = currIdleTime - *prevIdleTime;
+	double currTotalCpuTime = user + nice + system + currIdleTime + iowait + irq + softirq;
+	double updatedTotalCpuTime = currTotalCpuTime - *prevTotalCpuTime;
+	double updatedIdleCpuTime = currIdleTime - *prevIdleTime;
 	*prevTotalCpuTime = currTotalCpuTime;
 	*prevIdleTime = currIdleTime;
 	double cpuUsagePercentage = (1 - ((double)updatedIdleCpuTime / updatedTotalCpuTime)) * 100;
@@ -227,8 +227,8 @@ int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCP
 }
 
 void displayGraphs(int samples, int tdelay, bool displayMemory, bool displayCPU, int memoryOutputRow, int cpuOutputRow) {
-	float prevTotalCpuTime = 0;
-	float prevIdleTime = 0;
+	double prevTotalCpuTime = 0;
+	double prevIdleTime = 0;
 	struct sysinfo info;
     sysinfo(&info);
  	long totalram = info.totalram;
