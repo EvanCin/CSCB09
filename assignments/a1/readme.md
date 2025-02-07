@@ -1,4 +1,4 @@
-How the program was written:
+__How the program was written:__
 Memory utilization was calculated using <sys/sysinfo.h>, namely using variables totalram and freeram of struct sysinfo.
 Used ram is equal to totalram - freeram. 
 
@@ -17,12 +17,46 @@ To add the tdelay between each sample, usleep() was utilized.
 There was a warning when compiling with -std=c99 so added #define _DEFAULT_SOURCE
 as stated in https://man7.org/linux/man-pages/man3/usleep.3.html.
 
-"Functions:"
+__Functions:__
+1. int getNumCores()
+   Returns the number of cores
+2. double getMaxFreq()
+   Returns the maximum frequency in Ghz
+3. double getMemoryUsage(struct sysinfo* info)
+   Returns the current amount of memory usage in GB
+4. double getCpuUsage(double* prevTotalCpuTime, double* prevIdleTime)
+   Returns the current cpu usage as a percentage
+5. void displayParameters(int samples, int microsecondsTdelay)
+   Displays the chosen (or default) samples and tdelay values
+6. void displayMemoryGraph(long totalRam, int samples, int outputRow)
+   Displays the memory graph with no graph values
+7. void displayCPUGraph(int samples, int outputRow)
+   Displays the CPU graph with no graph values
+8. void printCores(int numCores)
+   Displays numCores core visual representation
+9. void displayCoreInfo(int outputRow)
+   Displays all core visual representation and the maximum frequency
+10.void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol, int outputRow)
+   Function is called with every sample and updates the memory graph with the current memory usage
+11.void updateCPUGraph(double cpuUsage, int currCol, int outputRow)
+   Function is called with every sample and updates the CPU graph with the current CPU usage
+12.bool isNumber(const char* str)
+   Returns true if str is a number and false otherwise
+13.int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCPU, bool* displayCore, char* input)
+   Checks if input is a valid argument ie --memory, --cores, --cpu, --samples=N, --tdelay=T
+   Updates the value corresponding to the argument accordingly
+   Returns 1 if valid argument and -1 otherwise
+14.void displayGraphs(int samples, int tdelay, bool displayMemory, bool displayCPU, int memoryOutputRow, int cpuOutputRow)
+   Displays the memory graph with all samples taken tdelay apart if displayMemory is true
+   Displays the CPU graph with all samples taken tdelay apart if displayCPU is true
+15.void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool displayCPU, bool displayCore)
+   Displays the information requested by the user from the command line arguments
+16.int main(int argc, char** argv)
+   Reads user command line arguments 
 
 
 
-
-How To Use Program:
+__How To Use Program:__
 1. gcc myMonitoringTool -std=c99 -Wall -Werror -o myMonitoringTool
 2. ./myMonitoringTool  [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T]
 Notes
