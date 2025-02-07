@@ -24,26 +24,19 @@ __Functions:__
    Returns the maximum frequency in Ghz
 3. double getMemoryUsage(struct sysinfo* info)<br />
    Returns the current amount of memory usage in GB
-4. double getCpuUsage(double* prevTotalCpuTime, double* prevIdleTime)
-
+4. double getCpuUsage(double* prevTotalCpuTime, double* prevIdleTime)<br />
    Returns the current cpu usage as a percentage
-5. void displayParameters(int samples, int microsecondsTdelay)
-
+5. void displayParameters(int samples, int microsecondsTdelay)<br />
    Displays the chosen (or default) samples and tdelay values
-6. void displayMemoryGraph(long totalRam, int samples, int outputRow)
-
+6. void displayMemoryGraph(long totalRam, int samples, int outputRow)<br />
    Displays the memory graph with no graph values
-7. void displayCPUGraph(int samples, int outputRow)
-   
+7. void displayCPUGraph(int samples, int outputRow)<br />
    Displays the CPU graph with no graph values
-8. void printCores(int numCores)
-   
+8. void printCores(int numCores)<br />
    Displays numCores core visual representation
-9. void displayCoreInfo(int outputRow)
-   
+9. void displayCoreInfo(int outputRow)<br />
    Displays all core visual representation and the maximum frequency
-10. void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol, int outputRow)
-   
+10. void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol, int outputRow)<br />
    Function is called with every sample and updates the memory graph with the current memory usage
    
 11. void updateCPUGraph(double cpuUsage, int currCol, int outputRow)
