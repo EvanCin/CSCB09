@@ -38,13 +38,9 @@ __Functions:__
    Displays all core visual representation and the maximum frequency
 10. void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol, int outputRow)<br />
    Function is called with every sample and updates the memory graph with the current memory usage
-   
-11. void updateCPUGraph(double cpuUsage, int currCol, int outputRow)
-   
+11. void updateCPUGraph(double cpuUsage, int currCol, int outputRow)<br />
    Function is called with every sample and updates the CPU graph with the current CPU usage
-   
-12. bool isNumber(const char* str)
-   
+12. bool isNumber(const char* str)<br />
    Returns true if str is a number and false otherwise
    
 13. int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCPU, bool* displayCore, char* input)
