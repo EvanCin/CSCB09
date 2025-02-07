@@ -9,25 +9,24 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-int getNumCpus() {
-	FILE* read_file;
-	int num_cpu = 0;
-	char file_path[256] = "/sys/devices/system/cpu/cpu";
-	int path_length = strlen(file_path);
-	//Convert num_cpu to string
-	char str_num_cpu[32];
-	sprintf(str_num_cpu, "%d", num_cpu);
-	strncat(file_path, str_num_cpu, 32);
-	read_file = fopen(file_path, "r");
-	while(read_file != NULL) {
-		fclose(read_file);
-		num_cpu++;
-		sprintf(str_num_cpu, "%d", num_cpu);
-		file_path[path_length] = '\0';
-		strncat(file_path, str_num_cpu, 32);
-		read_file = fopen(file_path, "r");
+int getNumCores() {
+	FILE* readFile;
+	int numCores = 0;
+	char filePath[256] = "/sys/devices/system/cpu/cpu";
+	int pathLength = strlen(filePath);
+	char strNumCores[32];
+	sprintf(strNumCores, "%d", numCores);
+	strncat(filePath, strNumCores, 32);
+	readFile = fopen(filePath, "r");
+	while(readFile != NULL) {
+		fclose(readFile);
+		numCores++;
+		sprintf(strNumCores, "%d", numCores);
+		filePath[pathLength] = '\0';
+		strncat(filePath, strNumCores, 32);
+		readFile = fopen(filePath, "r");
 	}
-	return num_cpu;
+	return numCores;
 }
 
 double getMaxFreq() {
@@ -137,15 +136,15 @@ void printCores(int numCores) {
 }
 
 void displayCoreInfo(int outputRow) {
-	int numCpus = getNumCpus();
+	int numCores = getNumCores();
 	printf("\x1b[%d;%df", outputRow, 1);
-	printf("v Number of Cores: %d @ %.2f GHz\n", numCpus, getMaxFreq());
-	int rowsToPrint = numCpus / 4;
-	int cpusToPrint = numCpus % 4;
+	printf("v Number of Cores: %d @ %.2f GHz\n", numCores, getMaxFreq());
+	int rowsToPrint = numCores / 4;
+	int coresToPrint = numCores % 4;
 	for(int r = 0; r < rowsToPrint; r++) {
 		printCores(4);
 	}
-	printCores(cpusToPrint);
+	printCores(coresToPrint);
 }
 
 void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol, int outputRow) {
