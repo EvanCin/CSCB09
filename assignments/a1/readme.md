@@ -60,12 +60,15 @@ __Functions:__
 13. int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCPU, bool* displayCore, char* input)
    
    Checks if input is a valid argument ie --memory, --cores, --cpu, --samples=N, --tdelay=T
+   
    Updates the value corresponding to the argument accordingly
+   
    Returns 1 if valid argument and -1 otherwise
    
 14. void displayGraphs(int samples, int tdelay, bool displayMemory, bool displayCPU, int memoryOutputRow, int cpuOutputRow)
    
    Displays the memory graph with all samples taken tdelay apart if displayMemory is true
+   
    Displays the CPU graph with all samples taken tdelay apart if displayCPU is true
    
 15. void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool displayCPU, bool displayCore)
