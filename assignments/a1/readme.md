@@ -48,24 +48,30 @@ __Functions:__
 10. void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol, int outputRow)
    
    Function is called with every sample and updates the memory graph with the current memory usage
+   
 11. void updateCPUGraph(double cpuUsage, int currCol, int outputRow)
    
    Function is called with every sample and updates the CPU graph with the current CPU usage
+   
 12. bool isNumber(const char* str)
    
    Returns true if str is a number and false otherwise
+   
 13. int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCPU, bool* displayCore, char* input)
    
    Checks if input is a valid argument ie --memory, --cores, --cpu, --samples=N, --tdelay=T
    Updates the value corresponding to the argument accordingly
    Returns 1 if valid argument and -1 otherwise
+   
 14. void displayGraphs(int samples, int tdelay, bool displayMemory, bool displayCPU, int memoryOutputRow, int cpuOutputRow)
    
    Displays the memory graph with all samples taken tdelay apart if displayMemory is true
    Displays the CPU graph with all samples taken tdelay apart if displayCPU is true
+   
 15. void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool displayCPU, bool displayCore)
    
    Displays the information requested by the user from the command line arguments
+   
 16. int main(int argc, char** argv)
    
    Reads user command line arguments 
