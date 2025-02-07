@@ -17,7 +17,7 @@ To add the tdelay between each sample, usleep() was utilized.
 There was a warning when compiling with -std=c99 so added #define _DEFAULT_SOURCE
 as stated in https://man7.org/linux/man-pages/man3/usleep.3.html.
 
-Functions:
+"Functions:"
 
 
 
