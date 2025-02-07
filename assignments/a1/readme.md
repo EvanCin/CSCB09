@@ -20,11 +20,9 @@ as stated in https://man7.org/linux/man-pages/man3/usleep.3.html.
 __Functions:__
 1. int getNumCores()<br />
    Returns the number of cores
-2. double getMaxFreq()
-
+2. double getMaxFreq()<br />
    Returns the maximum frequency in Ghz
-3. double getMemoryUsage(struct sysinfo* info)
-
+3. double getMemoryUsage(struct sysinfo* info)<br />
    Returns the current amount of memory usage in GB
 4. double getCpuUsage(double* prevTotalCpuTime, double* prevIdleTime)
 
