@@ -21,38 +21,53 @@ __Functions:__
 1. int getNumCores()
 
    Returns the number of cores
-3. double getMaxFreq()
+2. double getMaxFreq()
+
    Returns the maximum frequency in Ghz
-4. double getMemoryUsage(struct sysinfo* info)
+3. double getMemoryUsage(struct sysinfo* info)
+
    Returns the current amount of memory usage in GB
-5. double getCpuUsage(double* prevTotalCpuTime, double* prevIdleTime)
+4. double getCpuUsage(double* prevTotalCpuTime, double* prevIdleTime)
+
    Returns the current cpu usage as a percentage
-6. void displayParameters(int samples, int microsecondsTdelay)
+5. void displayParameters(int samples, int microsecondsTdelay)
+
    Displays the chosen (or default) samples and tdelay values
-7. void displayMemoryGraph(long totalRam, int samples, int outputRow)
+6. void displayMemoryGraph(long totalRam, int samples, int outputRow)
+
    Displays the memory graph with no graph values
-8. void displayCPUGraph(int samples, int outputRow)
+7. void displayCPUGraph(int samples, int outputRow)
+   
    Displays the CPU graph with no graph values
-9. void printCores(int numCores)
+8. void printCores(int numCores)
+   
    Displays numCores core visual representation
-10. void displayCoreInfo(int outputRow)
+9. void displayCoreInfo(int outputRow)
+   
    Displays all core visual representation and the maximum frequency
-11. void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol, int outputRow)
+10. void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol, int outputRow)
+   
    Function is called with every sample and updates the memory graph with the current memory usage
-12. void updateCPUGraph(double cpuUsage, int currCol, int outputRow)
+11. void updateCPUGraph(double cpuUsage, int currCol, int outputRow)
+   
    Function is called with every sample and updates the CPU graph with the current CPU usage
-13. bool isNumber(const char* str)
+12. bool isNumber(const char* str)
+   
    Returns true if str is a number and false otherwise
-14. int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCPU, bool* displayCore, char* input)
+13. int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCPU, bool* displayCore, char* input)
+   
    Checks if input is a valid argument ie --memory, --cores, --cpu, --samples=N, --tdelay=T
    Updates the value corresponding to the argument accordingly
    Returns 1 if valid argument and -1 otherwise
-15. void displayGraphs(int samples, int tdelay, bool displayMemory, bool displayCPU, int memoryOutputRow, int cpuOutputRow)
+14. void displayGraphs(int samples, int tdelay, bool displayMemory, bool displayCPU, int memoryOutputRow, int cpuOutputRow)
+   
    Displays the memory graph with all samples taken tdelay apart if displayMemory is true
    Displays the CPU graph with all samples taken tdelay apart if displayCPU is true
-16. void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool displayCPU, bool displayCore)
+15. void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool displayCPU, bool displayCore)
+   
    Displays the information requested by the user from the command line arguments
-17. int main(int argc, char** argv)
+16. int main(int argc, char** argv)
+   
    Reads user command line arguments 
 
 
