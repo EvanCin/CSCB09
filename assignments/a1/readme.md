@@ -42,28 +42,17 @@ __Functions:__
    Function is called with every sample and updates the CPU graph with the current CPU usage
 12. bool isNumber(const char* str)<br />
    Returns true if str is a number and false otherwise
-   
-13. int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCPU, bool* displayCore, char* input)
-   
-   Checks if input is a valid argument ie --memory, --cores, --cpu, --samples=N, --tdelay=T
-   
-   Updates the value corresponding to the argument accordingly
-   
-   Returns 1 if valid argument and -1 otherwise
-   
-14. void displayGraphs(int samples, int tdelay, bool displayMemory, bool displayCPU, int memoryOutputRow, int cpuOutputRow)
-   
-   Displays the memory graph with all samples taken tdelay apart if displayMemory is true
-   
-   Displays the CPU graph with all samples taken tdelay apart if displayCPU is true
-   
-15. void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool displayCPU, bool displayCore)
-   
+13. int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCPU, bool* displayCore, char* input)<br />
+   Checks if input is a valid argument ie --memory, --cores, --cpu, --samples=N, --tdelay=T<br />
+   Updates the value corresponding to the argument accordingly<br />
+   Returns 1 if valid argument and -1 otherwise<br />
+14. void displayGraphs(int samples, int tdelay, bool displayMemory, bool displayCPU, int memoryOutputRow, int cpuOutputRow)<br />
+   Displays the memory graph with all samples taken tdelay apart if displayMemory is true<br />
+   Displays the CPU graph with all samples taken tdelay apart if displayCPU is true<br />
+15. void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool displayCPU, bool displayCore)<br />
    Displays the information requested by the user from the command line arguments
-   
-16. int main(int argc, char** argv)
-   
-   Reads user command line arguments 
+16. int main(int argc, char** argv)<br />
+   Reads user command line arguments
 
 
 
