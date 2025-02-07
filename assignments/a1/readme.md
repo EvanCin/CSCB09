@@ -17,7 +17,7 @@ To add the tdelay between each sample, usleep() was utilized.<br />
 There was a warning when compiling with -std=c99 so added #define _DEFAULT_SOURCE<br />
 as stated in https://man7.org/linux/man-pages/man3/usleep.3.html.<br />
 
-__Functions:__
+__Functions:__ <br />
 1. int getNumCores()<br />
    Returns the number of cores
 2. double getMaxFreq()<br />
@@ -56,10 +56,10 @@ __Functions:__
 
 
 
-__How To Use Program:__
-1. gcc myMonitoringTool -std=c99 -Wall -Werror -o myMonitoringTool
-2. ./myMonitoringTool  [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T]
-Notes
-Same arguments can be used. ie ./myMonitoringTool --cpu --cpu
-The rightmost values will be used. ie ./myMonitoringTool 20 --samples=30 will run the program with samples = 30
-Another example, ./myMonitoringTool --tdelay=2000 --tdelay=1000 will run the program with tdelay = 1000
+__How To Use Program:__ <br />
+1. gcc myMonitoringTool -std=c99 -Wall -Werror -o myMonitoringTool <br />
+2. ./myMonitoringTool  [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T] <br />
+__Notes__ <br />
+Same arguments can be used. ie ./myMonitoringTool --cpu --cpu <br />
+The rightmost values will be used. ie ./myMonitoringTool 20 --samples=30 will run the program with samples = 30 <br />
+Another example, ./myMonitoringTool --tdelay=2000 --tdelay=1000 will run the program with tdelay = 1000 <br />
