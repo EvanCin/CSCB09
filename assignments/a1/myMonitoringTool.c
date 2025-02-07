@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+/*Returns the number of cores*/
 int getNumCores() {
 	FILE* readFile;
 	int numCores = 0;
@@ -29,6 +30,7 @@ int getNumCores() {
 	return numCores;
 }
 
+/*Returns the maximum frequency*/
 double getMaxFreq() {
 	FILE* readFile;
 	readFile = fopen("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", "r");
@@ -41,6 +43,14 @@ double getMaxFreq() {
 	return maxFreqGhz /= 1000000;
 }
 
+/*
+This function calls sysinfo() to get current memory status and
+calculates current memory usage
+Input: 
+	info: a pointer to a struct sysinfo
+Output: 
+	Returns the memory usage in GB
+*/
 double getMemoryUsage(struct sysinfo* info) {
 	sysinfo(info);
 	long totalRam = info->totalram;
@@ -50,6 +60,15 @@ double getMemoryUsage(struct sysinfo* info) {
 	return memoryUsageGB;
 }
 
+/*
+This function reads from /proc/stat to get CPU times and
+calculates the current CPU usage
+Input:
+	prevTotalCpuTime: a pointer to the cpu time of the last sample
+	prevIdleTime: a pointer to the idle time of the last sample
+Output:
+	Returns the current CPU usage as a percentage
+*/
 double getCpuUsage(double* prevTotalCpuTime, double* prevIdleTime) {
 	FILE* readFile;
 	readFile = fopen("/proc/stat", "r");
@@ -71,11 +90,19 @@ double getCpuUsage(double* prevTotalCpuTime, double* prevIdleTime) {
 	return cpuUsagePercentage;
 }
 
+/*Prints the number of samples and prints tdelay as microseconds and as seconds*/
 void displayParameters(int samples, int microsecondsTdelay) {
 	double secondsTdelay = (double) microsecondsTdelay / 1000000;
 	printf("Nbr of samples: %d -- every %d microSecs (%.3f secs)\n\n", samples, microsecondsTdelay, secondsTdelay);
 }
 
+/*
+This function displays the memory graph with no data
+Input:
+	totalRam: the total ram in bytes
+	samples: number of samples to take
+	outputRow: the initial row for printing
+*/
 void displayMemoryGraph(long totalRam, int samples, int outputRow) {
 	int col = 1;
 	double totalRamGB = (double) totalRam / 1000000000;
@@ -99,6 +126,12 @@ void displayMemoryGraph(long totalRam, int samples, int outputRow) {
 	}
 }
 
+/*
+This function displays the CPU graph with no data
+Input:
+	samples: number of samples to take
+	outputRow: the initial row for printing
+*/
 void displayCPUGraph(int samples, int outputRow) {
 	int col = 1;
 	printf("\x1b[%d;%df", outputRow, col);
@@ -120,6 +153,7 @@ void displayCPUGraph(int samples, int outputRow) {
 	}
 }
 
+/*Prints numCores cores*/
 void printCores(int numCores) {
 	for(int i = 0; i < numCores; i++) {
 		printf("+──+  ");
@@ -135,6 +169,10 @@ void printCores(int numCores) {
 	printf("\n");
 }
 
+/*
+This function prints the number of cores as a diagram
+starting at row outputRow and prints the maximum frequency
+*/
 void displayCoreInfo(int outputRow) {
 	int numCores = getNumCores();
 	printf("\x1b[%d;%df", outputRow, 1);
@@ -147,6 +185,14 @@ void displayCoreInfo(int outputRow) {
 	printCores(coresToPrint);
 }
 
+/*
+This function prints the memory usage from the current sample to the memory graph
+Input:
+	memoryPerBarGB: the amount of GB each bar '|' represents
+	usedRamGB: current ram usage
+	currCol: the current column for printing
+	outputRow: the initial row for printing
+*/
 void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol, int outputRow) {
 	printf("\x1b[%d;%df%.2f", outputRow, 11, usedRamGB);
 	outputRow += 13;
@@ -155,6 +201,13 @@ void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol, int
 	printf("#\n");
 }
 
+/*
+This function prints the CPU usage from the current sample to the CPU graph
+Input:
+	cpuUsage: current CPU usage
+	currCol: the current column for printing
+	outputRow: the initial row for printing
+*/
 void updateCPUGraph(double cpuUsage, int currCol, int outputRow) {
 	if(cpuUsage < 0) {
 		cpuUsage = 0;
@@ -171,6 +224,7 @@ void updateCPUGraph(double cpuUsage, int currCol, int outputRow) {
 	printf(":\n");
 }
 
+/*Returns true if str is a number, false otherwise*/
 bool isNumber(const char* str) {
 	for(int i = 0; str[i] != '\0'; i++) {
 		if(!isdigit(str[i])) {
@@ -180,7 +234,19 @@ bool isNumber(const char* str) {
 	return true;
 }
 
-//Returns 1 if valid input and update successful, -1 otherwise
+/*
+This function checks if input is a valid command line argument and
+updates the corresponding value
+Input:
+	samples: pointer to the samples value
+	tdelay: pointer to the tdelay value
+	displayMemory: if true memory graph will be displayed
+	displayCPU: if true cpu graph will be displayed
+	displayCore: if true core info will be displayed
+	input: input command line argument
+Output:
+	1 if input is valid argument, -1 otherwise
+*/
 int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCPU, bool* displayCore, char* input) {
 	if(strcmp(input, "--memory") == 0) {
 		*displayMemory = true;
@@ -221,6 +287,16 @@ int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCP
 	return -1;
 }
 
+/*
+Prints the memory and/or CPU graph
+Input:
+	samples: the amount of samples to take
+	tdelay: the delay between each sample
+	displayMemory: if true displays the memory graph with graph values
+	displayCPU: if true displays the CPU graph with graph values
+	memoryOutputRow: the initial row to print memory graph
+	cpuOutputRow: the initial row to print CPU graph
+*/
 void displayGraphs(int samples, int tdelay, bool displayMemory, bool displayCPU, int memoryOutputRow, int cpuOutputRow) {
 	double prevTotalCpuTime = 0;
 	double prevIdleTime = 0;
@@ -248,6 +324,15 @@ void displayGraphs(int samples, int tdelay, bool displayMemory, bool displayCPU,
  	}
 }
 
+/*
+This function prints the information corresponding to the command line arguments
+Input:
+	samples: the amount of samples to take
+	tdelay: the delay between each sample
+	displayMemory: if true displays the memory graph
+	displayCPU: if true displays the CPU graph
+	displayCore: if true displays the core info
+*/
 void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool displayCPU, bool displayCore) {
 	int memoryOutputRow = 3;
 	int cpuOutputRow;
