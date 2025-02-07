@@ -1,21 +1,21 @@
-__How the program was written:__
-Memory utilization was calculated using <sys/sysinfo.h>, namely using variables totalram and freeram of struct sysinfo.
+__How the program was written:__ <br />
+Memory utilization was calculated using <sys/sysinfo.h>, namely using variables totalram and freeram of struct sysinfo.<br />
 Used ram is equal to totalram - freeram. 
 
-CPU utilization was calculated by going to /proc/stat and dividing the idle time by the total time of the CPU.
-Since the times in /proc/stat are total times since the computer has started, the values of total time and idle time
-for the last sample are kept and subtracted from the current sample to get the actual change in time.
-https://www.linuxhowtos.org/System/procstat.htm was used to understand the values in /proc/stat
+CPU utilization was calculated by going to /proc/stat and dividing the idle time by the total time of the CPU.<br />
+Since the times in /proc/stat are total times since the computer has started, the values of total time and idle time<br />
+for the last sample are kept and subtracted from the current sample to get the actual change in time.<br />
+https://www.linuxhowtos.org/System/procstat.htm was used to understand the values in /proc/stat<br />
 
-Number of CPUs was calculated by going to /sys/devices/system/cpu and iterating through the cpu0, cpu1, ..., 
-located there to find the max cpu number.
+Number of CPUs was calculated by going to /sys/devices/system/cpu and iterating through the cpu0, cpu1, ..., <br />
+located there to find the max cpu number.<br />
 
-Max frequency was calculated by reading the value stored at
-/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq and converting from Khz to Ghz.
+Max frequency was calculated by reading the value stored at<br />
+/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq and converting from Khz to Ghz.<br />
 
-To add the tdelay between each sample, usleep() was utilized.
-There was a warning when compiling with -std=c99 so added #define _DEFAULT_SOURCE
-as stated in https://man7.org/linux/man-pages/man3/usleep.3.html.
+To add the tdelay between each sample, usleep() was utilized.<br />
+There was a warning when compiling with -std=c99 so added #define _DEFAULT_SOURCE<br />
+as stated in https://man7.org/linux/man-pages/man3/usleep.3.html.<br />
 
 __Functions:__
 1. int getNumCores()<br />
