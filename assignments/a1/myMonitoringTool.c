@@ -290,6 +290,7 @@ void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool disp
 	}
 	if(displayCore) {
 		displayCoreInfo(coreOutputRow);
+		return;
 	}
 	printf("\x1b[%d;%df", endOutputRow, 1);
 }
