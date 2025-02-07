@@ -18,8 +18,7 @@ There was a warning when compiling with -std=c99 so added #define _DEFAULT_SOURC
 as stated in https://man7.org/linux/man-pages/man3/usleep.3.html.
 
 __Functions:__
-1. int getNumCores()
-
+1. int getNumCores()<br />
    Returns the number of cores
 2. double getMaxFreq()
 
