@@ -57,7 +57,7 @@ __Functions:__ <br />
 
 
 __How To Use Program:__ <br />
-1. gcc myMonitoringTool -std=c99 -Wall -Werror -o myMonitoringTool <br />
+1. gcc myMonitoringTool.c -std=c99 -Wall -Werror -o myMonitoringTool <br />
 2. ./myMonitoringTool  [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T] <br />
 __Notes__ <br />
 Same arguments can be used. ie ./myMonitoringTool --cpu --cpu <br />
