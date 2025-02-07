@@ -17,6 +17,8 @@ To add the tdelay between each sample, usleep() was utilized.<br />
 There was a warning when compiling with -std=c99 so added #define _DEFAULT_SOURCE<br />
 as stated in https://man7.org/linux/man-pages/man3/usleep.3.html.<br />
 
+Escape codes were utilized to clear the screen and position the cursor to the right position for printing.<br />
+
 __Functions:__ <br />
 1. int getNumCores()<br />
    Returns the number of cores
