@@ -5,7 +5,9 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-int main() {
+#define MAX_PATH_LENGTH 256
+
+int getNumProcesses() {
 	int numProcesses = -1;
 	char str[20];
 	FILE* readFile = fopen("/proc/stat", "r");
@@ -15,16 +17,15 @@ int main() {
 		}
 	}
 	fclose(readFile);
-	printf("NUMPROCESSES %d\n", numProcesses);
-	//this part gets all accessible fds of processes
-	//in fdinfo are the inode for each fd
-	//this way we can get pid, fd, and inode info
-	//need to get filename
+	return numProcesses;
+}
+
+void displayCompositeTable(int numProcesses) {
+	printf("         PID     FD      Filename                Inode\n");
+	printf("        ===============================================\n");
+
 	int i = 1;
-	char path[25];
-	char temp[25];
-	//5000 is hardcoded, need to check if file /proc/%d exists
-	//to find end of processes
+	char path[MAX_PATH_LENGTH];
 	while(i < numProcesses) {
 		sprintf(path, "/proc/%d/fd", i);
 		DIR* dir = opendir(path);
@@ -47,9 +48,10 @@ int main() {
 					//printf("%s ", fdPath);
 					int length = readlink(fdPath, buf, sizeof(buf)-1);
 					buf[length] = '\0';
-					printf("PID: %d, FD: %s, Filename: %s\n", i, entry->d_name, buf);
+					//printf("PID: %d, FD: %s, Filename: %s\n", i, entry->d_name, buf);
 					if(status == 0) {
-						printf("INODE: %ld\n", statData.st_ino);
+						printf("         %d  %s      %s       %ld\n", i, entry->d_name, buf, statData.st_ino);
+						//printf("INODE: %ld\n", statData.st_ino);
 					}
 				}
 			}
@@ -57,6 +59,15 @@ int main() {
 		closedir(dir);
 		i++;
 	}
+
+}
+
+
+
+int main() {
+	int numProcesses = getNumProcesses();
+	printf("NUMPROCESSES %d\n", numProcesses);
+	displayCompositeTable(numProcesses);
 	
 	
 	return 0;
