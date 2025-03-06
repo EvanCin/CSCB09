@@ -35,13 +35,15 @@ int main() {
 			//	printf("process %d with inode %s ",i, entry->d_name);
 			//}
 			while((entry = readdir(dir)) != NULL) {
-				char fdPath[PATH_MAX];
-				char buf[PATH_MAX];
-				sprintf(fdPath, "/proc/%d/fd/%s", i, entry->d_name);
-				//printf("%s ", fdPath);
-				int length = readlink(fdPath, buf, sizeof(buf)-1);
-				buf[length] = '\0';
-				printf("PID: %d, FD: %s, Filename: %s\n", i, entry->d_name, buf);
+				if(strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+					char fdPath[PATH_MAX];
+					char buf[PATH_MAX];
+					sprintf(fdPath, "/proc/%d/fd/%s", i, entry->d_name);
+					//printf("%s ", fdPath);
+					int length = readlink(fdPath, buf, sizeof(buf)-1);
+					buf[length] = '\0';
+					printf("PID: %d, FD: %s, Filename: %s\n", i, entry->d_name, buf);
+				}
 			}
 		}
 		closedir(dir);
