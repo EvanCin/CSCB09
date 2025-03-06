@@ -6,6 +6,9 @@ at /proc/PID/fd. Referencing https://www.group-ib.com/blog/linux-pro-manipulatio
 containing symbolic links for each open file descriptor, thus we can use readlink https://pubs.opengroup.org/onlinepubs/7908799/xsh/readlink.html to read the contents of link and get file name.
 Utilized https://man7.org/linux/man-pages/man5/proc_pid_fd.5.html to learn about what is returned by readlink.
 
+PATH_MAX is utilized for specifying maximum length of path
+Linux has a limit of 1024 fd per process https://docs.oracle.com/cd/E19476-01/821-0505/file-descriptor-requirements.html#:~:text=Linux%20systems%20limit%20the%20number,worker%20threads%20will%20be%20blocked.
+
 __Functions:__ <br />
 
 
