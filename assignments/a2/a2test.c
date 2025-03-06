@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 int main() {
 	int numProcesses = -1;
@@ -38,11 +39,18 @@ int main() {
 				if(strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
 					char fdPath[PATH_MAX];
 					char buf[PATH_MAX];
+					struct stat statData;
+					int status;
 					sprintf(fdPath, "/proc/%d/fd/%s", i, entry->d_name);
+					status = lstat(fdPath, &statData);
+					
 					//printf("%s ", fdPath);
 					int length = readlink(fdPath, buf, sizeof(buf)-1);
 					buf[length] = '\0';
 					printf("PID: %d, FD: %s, Filename: %s\n", i, entry->d_name, buf);
+					if(status == 0) {
+						printf("INODE: %ld\n", statData.st_ino);
+					}
 				}
 			}
 		}
