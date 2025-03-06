@@ -22,22 +22,27 @@ int main() {
 	int i = 1;
 	char path[25];
 	char temp[25];
-	char buf[PATH_MAX];
 	//5000 is hardcoded, need to check if file /proc/%d exists
 	//to find end of processes
 	while(i < numProcesses) {
 		sprintf(path, "/proc/%d/fd", i);
-		sprintf(temp, "/proc/%d/fd/0", i); 
 		DIR* dir = opendir(path);
 		//Checks if able to access process info
 		if(dir != NULL) {
 			//printf("%d ", i);
 			struct dirent* entry;
-			if((entry = readdir(dir)) != NULL) {
-				printf("process %d with inode %s ",i, entry->d_name);
+			//if((entry = readdir(dir)) != NULL) {
+			//	printf("process %d with inode %s ",i, entry->d_name);
+			//}
+			while((entry = readdir(dir)) != NULL) {
+				char fdPath[PATH_MAX];
+				char buf[PATH_MAX];
+				sprintf(fdPath, "/proc/%d/fd/%s", i, entry->d_name);
+				//printf("%s ", fdPath);
+				int length = readlink(fdPath, buf, sizeof(buf)-1);
+				buf[length] = '\0';
+				printf("PID: %d, FD: %s, Filename: %s\n", i, entry->d_name, buf);
 			}
-			readlink(temp, buf, sizeof(buf)-1);
-			printf("%s ", buf);
 		}
 		closedir(dir);
 		i++;
