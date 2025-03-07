@@ -18,5 +18,6 @@ __How To Use Program:__ <br />
 1. gcc myMonitoringTool.c -std=c99 -Wall -Werror -o myMonitoringTool <br />
 2. ./myMonitoringTool  [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T] <br />
 __Notes__ <br />
-
+PID argument is a positional argument and should be the first arg if used
+If no arguments are given then the output is the composite table
 
