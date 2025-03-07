@@ -20,24 +20,22 @@ int getNumProcesses() {
 	return numProcesses;
 }
 
-void displayCompositeTable(int numProcesses) {
+void displayCompositeTable(int numProcesses, int pid) {
 	printf("         PID     FD      Filename                Inode\n");
 	printf("        ===============================================\n");
-
-	//int i = 1;
-	int i = 2675;
-	int max = 2675+1; //make this 1 greater than the particular pid
+	int i = 1;
+	int maxProcess = numProcesses; //make this 1 greater than the particular pid
+	if(pid != -1) {
+		i = pid;
+		maxProcess = pid+1;
+	}
 	char path[MAX_PATH_LENGTH];
-	while(i < max) {
+	while(i < maxProcess) {
 		sprintf(path, "/proc/%d/fd", i);
 		DIR* dir = opendir(path);
 		//Checks if able to access process info
 		if(dir != NULL) {
-			//printf("%d ", i);
 			struct dirent* entry;
-			//if((entry = readdir(dir)) != NULL) {
-			//	printf("process %d with inode %s ",i, entry->d_name);
-			//}
 			while((entry = readdir(dir)) != NULL) {
 				if(strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
 					char fdPath[PATH_MAX];
@@ -46,16 +44,11 @@ void displayCompositeTable(int numProcesses) {
 					int status;
 					sprintf(fdPath, "/proc/%d/fd/%s", i, entry->d_name);
 					status = stat(fdPath, &statData);
-					
-					//printf("%s ", fdPath);
 					int length = readlink(fdPath, buf, sizeof(buf)-1);
 					buf[length] = '\0';
-					//printf("PID: %d, FD: %s, Filename: %s\n", i, entry->d_name, buf);
 					if(status == 0) {
 						printf("         %d  %s      %s       %ld\n", i, entry->d_name, buf, statData.st_ino);
-						//printf("INODE: %ld\n", statData.st_ino);
 					}
-					//printf("%d\n",entry->d_ino);
 				}
 			}
 		}
@@ -65,14 +58,17 @@ void displayCompositeTable(int numProcesses) {
 	printf("        ===============================================\n");
 }
 
-void displayPerProcessTable(int numProcesses) {
+void displayPerProcessTable(int numProcesses, int pid) {
 	printf("         PID     FD\n");
 	printf("        ===============================================\n");
-	//int i = 1;
-	int i = 2675;
-	int max = 2675+1; //make this 1 greater than the particular pid
+	int i = 1;
+	int maxProcess = numProcesses; //make this 1 greater than the particular pid
+	if(pid != -1) {
+		i = pid;
+		maxProcess = pid+1;
+	}
 	char path[MAX_PATH_LENGTH];
-	while(i < max) {
+	while(i < maxProcess) {
 		sprintf(path, "/proc/%d/fd", i);
 		DIR* dir = opendir(path);
 		//Checks if able to access process info
@@ -90,15 +86,18 @@ void displayPerProcessTable(int numProcesses) {
 	printf("        ===============================================\n");
 }
 
-void displaySystemWideTable(int numProcesses) {
+void displaySystemWideTable(int numProcesses, int pid) {
 	printf("         PID     FD      Filename\n");
 	printf("        ===============================================\n");
 
-	//int i = 1;
-	int i = 2675;
-	int max = 2675+1; //make this 1 greater than the particular pid
+	int i = 1;
+	int maxProcess = numProcesses; //make this 1 greater than the particular pid
+	if(pid != -1) {
+		i = pid;
+		maxProcess = pid+1;
+	}
 	char path[MAX_PATH_LENGTH];
-	while(i < max) {
+	while(i < maxProcess) {
 		sprintf(path, "/proc/%d/fd", i);
 		DIR* dir = opendir(path);
 		//Checks if able to access process info
@@ -121,15 +120,18 @@ void displaySystemWideTable(int numProcesses) {
 	printf("        ===============================================\n");
 }
 
-void displayVnodesTable(int numProcesses) {
+void displayVnodesTable(int numProcesses, int pid) {
 	printf("           FD          Inode\n");
 	printf("        ===============================================\n");
 
-	//int i = 1;
-	int i = 2675;
-	int max = 2675+1; //make this 1 greater than the particular pid
+	int i = 1;
+	int maxProcess = numProcesses; //make this 1 greater than the particular pid
+	if(pid != -1) {
+		i = pid;
+		maxProcess = pid+1;
+	}
 	char path[MAX_PATH_LENGTH];
-	while(i < max) {
+	while(i < maxProcess) {
 		sprintf(path, "/proc/%d/fd", i);
 		DIR* dir = opendir(path);
 		//Checks if able to access process info
@@ -154,17 +156,70 @@ void displayVnodesTable(int numProcesses) {
 	printf("        ===============================================\n");
 }
 
-int main() {
+/*Returns true if str is a number, false otherwise*/
+bool isNumber(const char* str) {
+	for(int i = 0; str[i] != '\0'; i++) {
+		if(!isdigit(str[i])) {
+			return false;
+		}
+	}
+	return true;
+}
+
+//Updates the booleans of tables to display based on arg, returns -1 if arg is invalid
+bool updateArg(char* arg, bool* dComposite, bool* dSystemWide, bool* dVnodes, 
+		bool* dProcess, bool* dSummary, bool* dThreshold, int* thresholdVal) {
+	if(strcmp(arg, "--per-process") == 0) {
+		*dProcess = true;
+		return true;
+	}
+	if(strcmp(arg, "--systemWide") == 0) {
+		*dSystemWide = true;
+		return true;
+	}
+	if(strcmp(arg, "--Vnodes") == 0) {
+		*dVnodes = true;
+		return true;
+	}
+	if(strcmp(arg, "--composite") == 0) {
+		*dComposite = true;
+		return true;
+	}
+	if(strcmp(arg, "--summary") == 0) {
+		*dSummary = true;
+		return true;
+	}
+	int strlen = 0;
+	while(arg[strlen] != '\0') {
+		strlen++;
+	}
+	char secondHalfInput[strlen];
+	int inputNum;
+	strncpy(secondHalfInput, input+startOfNum, strlen);
+	if(!isNumber(secondHalfInput)) {
+		return -1;
+	} else {
+		inputNum = atoi(secondHalfInput);
+	}
+	return false;
+}
+
+int main(int argc, char** argv) {
 	int numProcesses = getNumProcesses();
 	printf("NUMPROCESSES %d\n", numProcesses);
-	displayCompositeTable(numProcesses);
-	displayPerProcessTable(numProcesses);
-	displaySystemWideTable(numProcesses);
-	displayVnodesTable(numProcesses);
-	return 0;
-	//struct dirent* entry;
+	displayCompositeTable(numProcesses, -1);
+	displayPerProcessTable(numProcesses, -1);
+	displaySystemWideTable(numProcesses, -1);
+	displayVnodesTable(numProcesses, -1);
 	
-
-	//closedir(dir);
-
+	bool displayComposite;
+	bool displaySystemWide;
+	bool displayVnodes;
+	bool displayProcess;
+	bool displaySummary;
+	bool displayThreshold;
+	int thresholdVal;
+	
+	
+	return 0;
 }
