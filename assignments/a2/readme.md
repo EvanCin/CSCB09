@@ -1,6 +1,6 @@
 __README -- Recreating the System-Wide FD Tables__ <br />
-Author: Evan Chen
-Date: March 7, 2025
+Author: Evan Chen <br />
+Date: March 7, 2025 <br />
 
 __ABOUT__ <br />
 This project is about displaying various information about processes and file descriptors in the file systems, specifically under /proc/pid/fd.
