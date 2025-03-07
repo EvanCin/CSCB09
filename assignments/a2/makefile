@@ -1,4 +1,4 @@
 CC = gcc
 
 showFDtables : systemWideFDTables.c
-	$(CC) systemWideFDTables -o showFDtables
+	$(CC) systemWideFDTables.c -o showFDtables
