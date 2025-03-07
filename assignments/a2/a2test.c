@@ -24,9 +24,11 @@ void displayCompositeTable(int numProcesses) {
 	printf("         PID     FD      Filename                Inode\n");
 	printf("        ===============================================\n");
 
-	int i = 1;
+	//int i = 1;
+	int i = 2675;
+	int max = 2675+1; //make this 1 greater than the particular pid
 	char path[MAX_PATH_LENGTH];
-	while(i < numProcesses) {
+	while(i < max) {
 		sprintf(path, "/proc/%d/fd", i);
 		DIR* dir = opendir(path);
 		//Checks if able to access process info
@@ -66,9 +68,11 @@ void displayCompositeTable(int numProcesses) {
 void displayPerProcessTable(int numProcesses) {
 	printf("         PID     FD\n");
 	printf("        ===============================================\n");
-	int i = 1;
+	//int i = 1;
+	int i = 2675;
+	int max = 2675+1; //make this 1 greater than the particular pid
 	char path[MAX_PATH_LENGTH];
-	while(i < numProcesses) {
+	while(i < max) {
 		sprintf(path, "/proc/%d/fd", i);
 		DIR* dir = opendir(path);
 		//Checks if able to access process info
@@ -90,9 +94,11 @@ void displaySystemWideTable(int numProcesses) {
 	printf("         PID     FD      Filename\n");
 	printf("        ===============================================\n");
 
-	int i = 1;
+	//int i = 1;
+	int i = 2675;
+	int max = 2675+1; //make this 1 greater than the particular pid
 	char path[MAX_PATH_LENGTH];
-	while(i < numProcesses) {
+	while(i < max) {
 		sprintf(path, "/proc/%d/fd", i);
 		DIR* dir = opendir(path);
 		//Checks if able to access process info
@@ -119,9 +125,11 @@ void displayVnodesTable(int numProcesses) {
 	printf("           FD          Inode\n");
 	printf("        ===============================================\n");
 
-	int i = 1;
+	//int i = 1;
+	int i = 2675;
+	int max = 2675+1; //make this 1 greater than the particular pid
 	char path[MAX_PATH_LENGTH];
-	while(i < numProcesses) {
+	while(i < max) {
 		sprintf(path, "/proc/%d/fd", i);
 		DIR* dir = opendir(path);
 		//Checks if able to access process info
