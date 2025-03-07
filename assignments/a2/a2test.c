@@ -43,7 +43,7 @@ void displayCompositeTable(int numProcesses) {
 					struct stat statData;
 					int status;
 					sprintf(fdPath, "/proc/%d/fd/%s", i, entry->d_name);
-					status = lstat(fdPath, &statData);
+					status = stat(fdPath, &statData);
 					
 					//printf("%s ", fdPath);
 					int length = readlink(fdPath, buf, sizeof(buf)-1);
@@ -53,6 +53,7 @@ void displayCompositeTable(int numProcesses) {
 						printf("         %d  %s      %s       %ld\n", i, entry->d_name, buf, statData.st_ino);
 						//printf("INODE: %ld\n", statData.st_ino);
 					}
+					//printf("%d\n",entry->d_ino);
 				}
 			}
 		}
