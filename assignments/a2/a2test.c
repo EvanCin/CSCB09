@@ -60,17 +60,99 @@ void displayCompositeTable(int numProcesses) {
 		closedir(dir);
 		i++;
 	}
-
+	printf("        ===============================================\n");
 }
 
+void displayPerProcessTable(int numProcesses) {
+	printf("         PID     FD\n");
+	printf("        ===============================================\n");
+	int i = 1;
+	char path[MAX_PATH_LENGTH];
+	while(i < numProcesses) {
+		sprintf(path, "/proc/%d/fd", i);
+		DIR* dir = opendir(path);
+		//Checks if able to access process info
+		if(dir != NULL) {
+			struct dirent* entry;
+			while((entry = readdir(dir)) != NULL) {
+				if(strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+					printf("         %d  %s\n", i, entry->d_name);
+				}
+			}
+		}
+		closedir(dir);
+		i++;
+	}
+	printf("        ===============================================\n");
+}
 
+void displaySystemWideTable(int numProcesses) {
+	printf("         PID     FD      Filename\n");
+	printf("        ===============================================\n");
+
+	int i = 1;
+	char path[MAX_PATH_LENGTH];
+	while(i < numProcesses) {
+		sprintf(path, "/proc/%d/fd", i);
+		DIR* dir = opendir(path);
+		//Checks if able to access process info
+		if(dir != NULL) {
+			struct dirent* entry;
+			while((entry = readdir(dir)) != NULL) {
+				if(strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+					char fdPath[PATH_MAX];
+					char buf[PATH_MAX];
+					sprintf(fdPath, "/proc/%d/fd/%s", i, entry->d_name);
+					int length = readlink(fdPath, buf, sizeof(buf)-1);
+					buf[length] = '\0';
+					printf("         %d  %s      %s\n", i, entry->d_name, buf);
+				}
+			}
+		}
+		closedir(dir);
+		i++;
+	}
+	printf("        ===============================================\n");
+}
+
+void displayVnodesTable(int numProcesses) {
+	printf("           FD          Inode\n");
+	printf("        ===============================================\n");
+
+	int i = 1;
+	char path[MAX_PATH_LENGTH];
+	while(i < numProcesses) {
+		sprintf(path, "/proc/%d/fd", i);
+		DIR* dir = opendir(path);
+		//Checks if able to access process info
+		if(dir != NULL) {
+			struct dirent* entry;
+			while((entry = readdir(dir)) != NULL) {
+				if(strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+					char fdPath[PATH_MAX];
+					struct stat statData;
+					int status;
+					sprintf(fdPath, "/proc/%d/fd/%s", i, entry->d_name);
+					status = stat(fdPath, &statData);
+					if(status == 0) {
+						printf("        %s        %ld\n", entry->d_name, statData.st_ino);
+					}
+				}
+			}
+		}
+		closedir(dir);
+		i++;
+	}
+	printf("        ===============================================\n");
+}
 
 int main() {
 	int numProcesses = getNumProcesses();
 	printf("NUMPROCESSES %d\n", numProcesses);
 	displayCompositeTable(numProcesses);
-	
-	
+	displayPerProcessTable(numProcesses);
+	displaySystemWideTable(numProcesses);
+	displayVnodesTable(numProcesses);
 	return 0;
 	//struct dirent* entry;
 	
