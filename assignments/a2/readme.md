@@ -36,4 +36,4 @@ __How To Use Program:__ <br />
 __Notes__ <br />
 PID argument is a positional argument and should be the first arg if used
 If no arguments are given then the output is the composite table
-
+When compiling with std=c99, readlink gives an error saying implicit declaration, so after looking at https://man7.org/linux/man-pages/man2/readlink.2.html, I found that readlink() requires _POSIX_C_SOURCE >= 200112L and after researching I found https://stackoverflow.com/questions/66862654/why-does-my-compiler-think-my-readlink-is-implicitly-declared-if-i-set-the-sta where I found a POSIX c source which worked for compiling so I included -D_POSIX_C_SOURCE=200809L in my makefile since 2008 >= 2001
