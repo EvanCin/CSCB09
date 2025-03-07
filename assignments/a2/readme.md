@@ -1,11 +1,11 @@
-__README -- Recreating the System-Wide FD Tables__ 
+__README -- Recreating the System-Wide FD Tables__ <br />
 Author: Evan Chen
 Date: March 7, 2025
 
-__ABOUT__
+__ABOUT__ <br />
 This project is about displaying various information about processes and file descriptors in the file systems, specifically under /proc/pid/fd.
 
-__Approach to the problem__
+__Approach to the problem__ <br />
 1. I investigated /proc/stat and utilized /proc/stat to get the number of processes to know how many processes to iterate over and check if they exist.
 2. Each process that is running exists in /proc/pid and through that I was able to find the open file descriptors for each process through /proc/pid/fd
 3. Made use of dirent.h to open and read directories, specifically the file descriptors for each PID stored
