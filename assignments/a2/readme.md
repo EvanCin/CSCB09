@@ -23,10 +23,15 @@ __Implementation__ <br />
    in proc to fetch the relevant information.
 2. I have one module called systemWideFDTables.c that contains the code for the whole implementation.
 3. __getNumProcesses()__ returns the number of active processes from /proc/stat. It opens the /proc/stat file and reads
-   until it gets to the process line and retrieves the process number.
+   until it gets to the process line and retrieves the process number. <br />
    __displayCompositeTable(int numProcesses, int pid)__ displays the table corresponding to the user arg --composite. It opens
-   the directory /proc/pid/fd using functions from dirent.h and goes through all the pids and their relevant file descriptors. It uses          readlink() from unistd.h and stat() from sys/stat.h to get inode and filename
-
+   the directory /proc/pid/fd using functions from dirent.h and goes through all the pids and their relevant file descriptors. It uses          readlink() from unistd.h and stat() from sys/stat.h to get inode and filename. <br />
+   __displayPerProcessTable(int numProcesses, int pid)__ displays the table corresponding to the user arg --per-process. It opens
+   the directory /proc/pid/fd using functions from dirent.h and goes through all the pids and their relevant file descriptors. <br />
+   __displaySystemWideTable(int numProcesses, int pid)__ displays the table corresponding to the user arg --systemWide. It opens
+   the directory /proc/pid/fd using functions from dirent.h and goes through all the pids and their relevant file descriptors. It uses          readlink() from unistd.h to get filename. <br />
+   __displayVnodesTable(int numProcesses, int pid)__ displays the table corresponding to the user arg --Vnodes. It opens
+   the directory /proc/pid/fd using functions from dirent.h and goes through all the pids and their relevant file descriptors. It uses          stat() from sys/stat.h to get inode. <br />
 
 __How the program was written:__ <br />
 Utilized /proc/stat to get the number of processes to know how many processes to store in array.
