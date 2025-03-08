@@ -25,8 +25,7 @@ __Implementation__ <br />
 3. __getNumProcesses()__ returns the number of active processes from /proc/stat. It opens the /proc/stat file and reads
    until it gets to the process line and retrieves the process number.
    __displayCompositeTable(int numProcesses, int pid)__ displays the table corresponding to the user arg --composite. It opens
-   the directory /proc/pid/fd and goes through all the pids and their relevant file descriptors. It uses readlink() and stat() 
-
+   the directory /proc/pid/fd using functions from dirent.h and goes through all the pids and their relevant file descriptors. It uses          readlink() from unistd.h and stat() from sys/stat.h to get inode and filename
 
 
 __How the program was written:__ <br />
