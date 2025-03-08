@@ -16,6 +16,16 @@ Utilized https://man7.org/linux/man-pages/man5/proc_pid_fd.5.html to learn about
 5. Utilized stat structure and made calls to stat() to get file descriptor info, particularly for getting inode at st_ino in stat struct.
 
 __Implementation__ <br />
+1. For implementation, I separated the code into sections that performed getting, checking, updating, and displaying.
+   I had the main function check the input arguments and feed them into an update function that updated variables
+   which decided which tables to display. Then I fed those variables into a display function that called the display function
+   corresponding to the variable. I created a display function for each type of table display and had them go through the pids
+   in proc to fetch the relevant information.
+2. I have one module called systemWideFDTables.c that contains the code for the whole implementation.
+3. __getNumProcesses()__ returns the number of active processes from /proc/stat. It opens the /proc/stat file and reads
+   until it gets to the process line and retrieves the process number.
+   __displayCompositeTable(int numProcesses, int pid)__ displays the table corresponding to the user arg --composite. It opens
+   the directory /proc/pid/fd and goes through all the pids and their relevant file descriptors. It uses readlink() and stat() 
 
 
 
