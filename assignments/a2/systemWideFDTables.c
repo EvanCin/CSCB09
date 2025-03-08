@@ -41,15 +41,16 @@ void displayCompositeTable(int numProcesses, int pid) {
 			while((entry = readdir(dir)) != NULL) {
 				if(strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
 					char fdPath[PATH_MAX];
-					char buf[PATH_MAX];
+					char fileName[PATH_MAX];
 					struct stat statData;
 					int status;
 					sprintf(fdPath, "/proc/%d/fd/%s", i, entry->d_name);
 					status = stat(fdPath, &statData);
-					int length = readlink(fdPath, buf, sizeof(buf)-1);
-					buf[length] = '\0';
+					int length = readlink(fdPath, fileName, sizeof(fileName)-1);
+					//Only want filename
+					fileName[length] = '\0';
 					if(status == 0) {
-						printf("         %d  %s      %s      %ld\n", i, entry->d_name, buf, statData.st_ino);
+						printf("         %d  %s      %s      %ld\n", i, entry->d_name, fileName, statData.st_ino);
 					}
 				}
 			}
@@ -108,11 +109,12 @@ void displaySystemWideTable(int numProcesses, int pid) {
 			while((entry = readdir(dir)) != NULL) {
 				if(strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
 					char fdPath[PATH_MAX];
-					char buf[PATH_MAX];
+					char fileName[PATH_MAX];
 					sprintf(fdPath, "/proc/%d/fd/%s", i, entry->d_name);
-					int length = readlink(fdPath, buf, sizeof(buf)-1);
-					buf[length] = '\0';
-					printf("         %d  %s      %s\n", i, entry->d_name, buf);
+					int length = readlink(fdPath, fileName, sizeof(fileName)-1);
+					//Only want filename
+					fileName[length] = '\0';
+					printf("         %d  %s      %s\n", i, entry->d_name, fileName);
 				}
 			}
 		}
