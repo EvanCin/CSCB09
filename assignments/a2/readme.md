@@ -32,7 +32,24 @@ __Implementation__ <br />
    the directory /proc/pid/fd using functions from dirent.h and goes through all the pids and their relevant file descriptors. It uses          readlink() from unistd.h to get filename. <br />
    __displayVnodesTable(int numProcesses, int pid)__ displays the table corresponding to the user arg --Vnodes. It opens
    the directory /proc/pid/fd using functions from dirent.h and goes through all the pids and their relevant file descriptors. It uses          stat() from sys/stat.h to get inode. <br />
-   
+   __displaySummaryTable(int numProcesses)__ displays the table corresponding to the user arg --summary. It opens
+   the directory /proc/pid/fd using functions from dirent.h and goes through all the pids and their relevant file descriptors. It        
+   sums the number of file descriptors open per process and prints it. <br />
+   __displayThresholdTable(int numProcesses, int thresholdVal)__ displays the table corresponding to the user arg --threshold=X. It opens
+   the directory /proc/pid/fd using functions from dirent.h and goes through all the pids and their relevant file descriptors. It        
+   sums the number of file descriptors open per process and prints it if the sum is greater than or equal to thresholdVal. <br />
+   __isNumber(const char* str)__ returns true if str is a number and false otherwise. The function loops through each character of str
+   and calls on isdigit() from ctype.h to check if character is a digit. <br />
+   __isAccessiblePid(int pid)__ returns true if pid is accessible and false otherwise. The function attempts to open the file descriptor
+   directory for pid at /proc/pid/fd using functions from dirent.h. <br />
+   __updateArg(char* arg, bool* dComposite, bool* dSystemWide, bool* dVnodes, <br />
+		bool* dProcess, bool* dSummary, bool* dThreshold, int* thresholdVal)__ <br />
+   updates the booleans and values for the corresponding values based on the user argument arg. <br />
+   __displayTables(bool dComposite, bool dSystemWide, bool dVnodes, <br />
+      bool dProcess, bool dSummary, bool dThreshold, int thresholdVal, int pid)__ <br />
+   displays the tables based on boolean values by calling the display function corresponding to the boolean values. <br />
+   __main(int argc, char** argv)__ <br />
+   checks user arguments, calls updateArg to update boolean values and prints the tables with a call to displayTables. <br />
 
 __How the program was written:__ <br />
 
