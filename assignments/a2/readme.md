@@ -32,14 +32,12 @@ __Implementation__ <br />
    the directory /proc/pid/fd using functions from dirent.h and goes through all the pids and their relevant file descriptors. It uses          readlink() from unistd.h to get filename. <br />
    __displayVnodesTable(int numProcesses, int pid)__ displays the table corresponding to the user arg --Vnodes. It opens
    the directory /proc/pid/fd using functions from dirent.h and goes through all the pids and their relevant file descriptors. It uses          stat() from sys/stat.h to get inode. <br />
+   
 
 __How the program was written:__ <br />
-Utilized /proc/stat to get the number of processes to know how many processes to store in array.
 
- 
-
-PATH_MAX is utilized for specifying maximum length of path
-Linux has a limit of 1024 fd per process https://docs.oracle.com/cd/E19476-01/821-0505/file-descriptor-requirements.html#:~:text=Linux%20systems%20limit%20the%20number,worker%20threads%20will%20be%20blocked.
+I found the maximum path length through https://stackoverflow.com/questions/9449241/where-is-path-max-defined-in-linux and
+defined a constant variable PATH_MAX to be 4096
 
 __Functions:__ <br />
 
