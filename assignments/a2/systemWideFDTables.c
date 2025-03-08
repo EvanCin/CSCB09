@@ -1,4 +1,3 @@
-#define _DEFAULT_SOURCE //For readlink
 #include <dirent.h>
 #include <stdlib.h>
 #include <stdio.h>
