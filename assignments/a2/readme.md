@@ -69,12 +69,25 @@ __Expected Results__ <br />
 ./showFDtables --per-process --systemWide --Vnodes --composite displays the per process, system wide, vnodes, and composite tables for all pids <br />
 ./showFDtables [pid] --per-process --systemWide --Vnodes --composite displays the per process, system wide, vnodes, and composite tables for only pid <br />
 
-
-
+__Test Cases__ <br />
+Running with invalid/inaccessible pid gives the error message: FD directory of PID [pid] is not accessible <br />
+Running with invalid arguments gives error message: Invalid argument, input should be of form: ./showFDtables [pid] [--per-process] [--systemWide] [--Vnodes] [--composite] [--summary] [--threshold=X] <br />
 
 __Notes__ <br />
-PID argument is a positional argument and should be the first arg if used
-If no arguments are given then the output is the composite table
-When compiling with std=c99, readlink gives an error saying implicit declaration, so after looking at https://man7.org/linux/man-pages/man2/readlink.2.html, I found that readlink() requires _POSIX_C_SOURCE >= 200112L and after researching I found https://stackoverflow.com/questions/66862654/why-does-my-compiler-think-my-readlink-is-implicitly-declared-if-i-set-the-sta where I found a POSIX c source which worked for compiling so I included -D_POSIX_C_SOURCE=200809L in my makefile since 2008 >= 2001
+PID argument is a positional argument and should be the first arg if used <br />
+If no arguments are given then the output is the composite table <br />
+When compiling with std=c99, readlink gives an error saying implicit declaration, so after looking at https://man7.org/linux/man-pages/man2/readlink.2.html, I found that readlink() requires _POSIX_C_SOURCE >= 200112L and after researching I found https://stackoverflow.com/questions/66862654/why-does-my-compiler-think-my-readlink-is-implicitly-declared-if-i-set-the-sta where I found a POSIX c source which worked for compiling so I included -D_POSIX_C_SOURCE=200809L in my makefile since 2008 >= 2001 <br />
 I found the maximum path length through https://stackoverflow.com/questions/9449241/where-is-path-max-defined-in-linux and
-defined a constant variable PATH_MAX to be 4096
+defined a constant variable PATH_MAX to be 4096 <br />
+
+__References__ <br />
+https://man7.org/linux/man-pages/man5/proc.5.html
+https://man7.org/linux/man-pages/man0/sys_types.h.0p.html
+https://www.man7.org/linux/man-pages/man0/sys_stat.h.0p.html
+https://pubs.opengroup.org/onlinepubs/7908799/xsh/dirent.h.html
+https://pubs.opengroup.org/onlinepubs/7908799/xsh/unistd.h.html
+https://www.group-ib.com/blog/linux-pro-manipulation/
+https://pubs.opengroup.org/onlinepubs/7908799/xsh/readlink.html
+https://man7.org/linux/man-pages/man2/readlink.2.html
+https://stackoverflow.com/questions/66862654/why-does-my-compiler-think-my-readlink-is-implicitly-declared-if-i-set-the-sta
+https://stackoverflow.com/questions/9449241/where-is-path-max-defined-in-linux
