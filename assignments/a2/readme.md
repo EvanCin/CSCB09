@@ -51,23 +51,30 @@ __Implementation__ <br />
    __main(int argc, char** argv)__ <br />
    checks user arguments, calls updateArg to update boolean values and prints the tables with a call to displayTables. <br />
 
-
 __Flow Chart Diagram__ <br />
 ![flow chart diagram](https://github.com/EvanCin/CSCB09/blob/main/assignments/a2/B09Diagram.drawio.png)
 
-__How the program was written:__ <br />
-
-I found the maximum path length through https://stackoverflow.com/questions/9449241/where-is-path-max-defined-in-linux and
-defined a constant variable PATH_MAX to be 4096
-
-
-
-
-
 __How To Use Program:__ <br />
-1. gcc myMonitoringTool.c -std=c99 -Wall -Werror -o myMonitoringTool <br />
-2. ./myMonitoringTool  [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T] <br />
+1. To compile code: make <br />
+2. makefile uses ccflags -std=c99, -Wall, -Werror, -D_POSIX_C_SOURCE=200809L (for readlink, more details in Notes section) <br />
+3. To run: ./showFDtables [pid] [--per-process] [--systemWide] [--Vnodes] [--composite] [--summary] [--threshold=X] <br />
+
+__Expected Results__ <br />
+./showFDtables displays the composite table for all pids <br />
+./showFDtables [pid] displays the composite table for pid <br />
+./showFDtables --summary displays the summary table for all pids <br />
+./showFDtables [pid] --summary displays the composite table for pid and displays the summary table for all pids <br />
+./showFDtables --threshold=X displays the threshold table for all pids with amount of fds >= X <br />
+./showFDtables [pid] --threshold=X displays the composite table for pid and displays the threshold table for all pids with amount of fds >= X <br />
+./showFDtables --per-process --systemWide --Vnodes --composite displays the per process, system wide, vnodes, and composite tables for all pids <br />
+./showFDtables [pid] --per-process --systemWide --Vnodes --composite displays the per process, system wide, vnodes, and composite tables for only pid <br />
+
+
+
+
 __Notes__ <br />
 PID argument is a positional argument and should be the first arg if used
 If no arguments are given then the output is the composite table
 When compiling with std=c99, readlink gives an error saying implicit declaration, so after looking at https://man7.org/linux/man-pages/man2/readlink.2.html, I found that readlink() requires _POSIX_C_SOURCE >= 200112L and after researching I found https://stackoverflow.com/questions/66862654/why-does-my-compiler-think-my-readlink-is-implicitly-declared-if-i-set-the-sta where I found a POSIX c source which worked for compiling so I included -D_POSIX_C_SOURCE=200809L in my makefile since 2008 >= 2001
+I found the maximum path length through https://stackoverflow.com/questions/9449241/where-is-path-max-defined-in-linux and
+defined a constant variable PATH_MAX to be 4096
