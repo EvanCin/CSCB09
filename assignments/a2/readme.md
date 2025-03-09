@@ -52,7 +52,7 @@ __Implementation__ <br />
    checks user arguments, calls updateArg to update boolean values and prints the tables with a call to displayTables. <br />
 
 __Flow Chart Diagram__ <br />
-![flow chart diagram](https://github.com/EvanCin/CSCB09/blob/main/assignments/a2/B09Diagram.drawio.png)
+![flow chart diagram](https://github.com/user-attachments/assets/a6032db5-2fbc-4034-8f6b-cd91cdf866bf)
 
 __How To Use Program:__ <br />
 1. To compile code: make <br />
@@ -91,3 +91,6 @@ https://pubs.opengroup.org/onlinepubs/7908799/xsh/readlink.html
 https://man7.org/linux/man-pages/man2/readlink.2.html
 https://stackoverflow.com/questions/66862654/why-does-my-compiler-think-my-readlink-is-implicitly-declared-if-i-set-the-sta
 https://stackoverflow.com/questions/9449241/where-is-path-max-defined-in-linux
+
+
+
