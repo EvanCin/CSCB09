@@ -51,12 +51,15 @@ __Implementation__ <br />
    __main(int argc, char** argv)__ <br />
    checks user arguments, calls updateArg to update boolean values and prints the tables with a call to displayTables. <br />
 
+
+
+
+
 __How the program was written:__ <br />
 
 I found the maximum path length through https://stackoverflow.com/questions/9449241/where-is-path-max-defined-in-linux and
 defined a constant variable PATH_MAX to be 4096
 
-__Functions:__ <br />
 
 
 
