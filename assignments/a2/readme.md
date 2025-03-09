@@ -53,7 +53,7 @@ __Implementation__ <br />
 
 
 __Flow Chart Diagram__ <br />
-![flow chart diagram]()
+![flow chart diagram](https://github.com/EvanCin/CSCB09/blob/main/assignments/a2/B09Diagram.drawio.png)
 
 __How the program was written:__ <br />
 
