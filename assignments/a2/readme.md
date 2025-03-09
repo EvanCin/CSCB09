@@ -81,16 +81,13 @@ I found the maximum path length through https://stackoverflow.com/questions/9449
 defined a constant variable PATH_MAX to be 4096 <br />
 
 __References__ <br />
-https://man7.org/linux/man-pages/man5/proc.5.html
-https://man7.org/linux/man-pages/man0/sys_types.h.0p.html
-https://www.man7.org/linux/man-pages/man0/sys_stat.h.0p.html
-https://pubs.opengroup.org/onlinepubs/7908799/xsh/dirent.h.html
-https://pubs.opengroup.org/onlinepubs/7908799/xsh/unistd.h.html
-https://www.group-ib.com/blog/linux-pro-manipulation/
-https://pubs.opengroup.org/onlinepubs/7908799/xsh/readlink.html
-https://man7.org/linux/man-pages/man2/readlink.2.html
-https://stackoverflow.com/questions/66862654/why-does-my-compiler-think-my-readlink-is-implicitly-declared-if-i-set-the-sta
-https://stackoverflow.com/questions/9449241/where-is-path-max-defined-in-linux
-
-
-
+https://man7.org/linux/man-pages/man5/proc.5.html <br />
+https://man7.org/linux/man-pages/man0/sys_types.h.0p.html <br />
+https://www.man7.org/linux/man-pages/man0/sys_stat.h.0p.html <br />
+https://pubs.opengroup.org/onlinepubs/7908799/xsh/dirent.h.html <br />
+https://pubs.opengroup.org/onlinepubs/7908799/xsh/unistd.h.html <br />
+https://www.group-ib.com/blog/linux-pro-manipulation/ <br />
+https://pubs.opengroup.org/onlinepubs/7908799/xsh/readlink.html <br />
+https://man7.org/linux/man-pages/man2/readlink.2.html <br />
+https://stackoverflow.com/questions/66862654/why-does-my-compiler-think-my-readlink-is-implicitly-declared-if-i-set-the-sta <br />
+https://stackoverflow.com/questions/9449241/where-is-path-max-defined-in-linux <br />
