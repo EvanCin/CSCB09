@@ -10,6 +10,10 @@
 #define PATH_MAX 4096
 
 int getNumProcesses() {
+/*
+descry: this function gets the number of active processes
+returning: this function returns an int representing the number of active processes
+*/
 	int numProcesses = -1;
 	char str[20];
 	FILE* readFile = fopen("/proc/stat", "r");
@@ -23,6 +27,12 @@ int getNumProcesses() {
 }
 
 void displayCompositeTable(int numProcesses, int pid) {
+/*
+descry: this function displays the composite table
+numProcesses: the number of active processes
+pid: the process specified by the user, pid if given, -1 otherwise
+returning: this function does not return anything
+*/
 	printf("         PID     FD     Filename       Inode\n");
 	printf("        ======================================\n");
 	int i = 1;
@@ -62,6 +72,12 @@ void displayCompositeTable(int numProcesses, int pid) {
 }
 
 void displayPerProcessTable(int numProcesses, int pid) {
+/*
+descry: this function displays the process FD table
+numProcesses: the number of active processes
+pid: the process specified by the user, pid if given, -1 otherwise
+returning: this function does not return anything
+*/
 	printf("         PID     FD\n");
 	printf("        ============\n");
 	int i = 1;
@@ -90,6 +106,12 @@ void displayPerProcessTable(int numProcesses, int pid) {
 }
 
 void displaySystemWideTable(int numProcesses, int pid) {
+/*
+descry: this function displays the system wide table
+numProcesses: the number of active processes
+pid: the process specified by the user, pid if given, -1 otherwise
+returning: this function does not return anything
+*/
 	printf("         PID     FD     Filename\n");
 	printf("        ===============================================\n");
 
@@ -125,6 +147,12 @@ void displaySystemWideTable(int numProcesses, int pid) {
 }
 
 void displayVnodesTable(int numProcesses, int pid) {
+/*
+descry: this function displays the vnode table
+numProcesses: the number of active processes
+pid: the process specified by the user, pid if given, -1 otherwise
+returning: this function does not return anything
+*/
 	printf("           FD          Inode\n");
 	printf("        ===============================================\n");
 
@@ -161,6 +189,11 @@ void displayVnodesTable(int numProcesses, int pid) {
 }
 
 void displaySummaryTable(int numProcesses) {
+/*
+descry: this function displays each active process with the number of open file descriptors
+numProcesses: the number of active processes
+returning: this function does not return anything
+*/
 	printf("         Summary Table\n");
 	printf("         =============\n");
 	int i = 1;
@@ -186,6 +219,13 @@ void displaySummaryTable(int numProcesses) {
 }
 
 void displayThresholdTable(int numProcesses, int thresholdVal) {
+/*
+descry: this function displays each active process with the number of open file descriptors
+		only if number of open file descriptors is greater than or equal to thresholdVal
+numProcesses: the number of active processes
+thresholdVal: the user indicated threshold value, processes with number of fds >= thresholdVal will be printed
+returning: this function does not return anything
+*/
 	printf("## Offending processes -- #FD threshold=%d\n", thresholdVal);
 	int i = 1;
 	char path[PATH_MAX];
@@ -211,8 +251,12 @@ void displayThresholdTable(int numProcesses, int thresholdVal) {
 	printf("\n");
 }
 
-/*Returns true if str is a number, false otherwise*/
 bool isNumber(const char* str) {
+/*
+descry: this function checks if a string is a number
+str: a string
+returning: this function returns true if str is a number, false otherwise
+*/
 	for(int i = 0; str[i] != '\0'; i++) {
 		if(!isdigit(str[i])) {
 			return false;
@@ -221,8 +265,12 @@ bool isNumber(const char* str) {
 	return true;
 }
 
-/*Returns true if the pid's file descriptor directory is accessible, false otherwise*/
 bool isAccessiblePid(int pid) {
+/*
+descry: this function checks if the given pid is accessible
+pid: a process id
+returning: this function returns true if the pid's file descriptor directory is accessible, false otherwise
+*/
 	char path[PATH_MAX];
 	sprintf(path, "/proc/%d/fd", pid);
 	DIR* dir = opendir(path);
@@ -234,9 +282,20 @@ bool isAccessiblePid(int pid) {
 	return false;
 }
 
-//Updates the booleans of tables to display based on arg, returns -1 if arg is invalid
 bool updateArg(char* arg, bool* dComposite, bool* dSystemWide, bool* dVnodes, 
 		bool* dProcess, bool* dSummary, bool* dThreshold, int* thresholdVal) {
+/*
+descry: this function updates the booleans of tables to display based on arg
+arg: user input argument
+dComposite: true indicates display composite table, false otherwise
+dSystemWide: true indicates display system wide table, false otherwise
+dVnodes: true indicates display Vnodes table, false otherwise
+dProcess: true indicates display process FD table, false otherwise
+dSummary: true indicates display summary table, false otherwise
+dThreshold: true indicates display threshold table, false otherwise
+thresholdVal: the minimum number of fds a process needs to be printed in threshold table
+returning: this function returns true if update successful, false is update failed
+*/
 	if(strcmp(arg, "--per-process") == 0) {
 		*dProcess = true;
 		return true;
@@ -283,6 +342,18 @@ bool updateArg(char* arg, bool* dComposite, bool* dSystemWide, bool* dVnodes,
 
 void displayTables(bool dComposite, bool dSystemWide, bool dVnodes, 
 					bool dProcess, bool dSummary, bool dThreshold, int thresholdVal, int pid) {
+/*
+descry: this function determines which tables are displayed
+dComposite: true indicates display composite table, false otherwise
+dSystemWide: true indicates display system wide table, false otherwise
+dVnodes: true indicates display Vnodes table, false otherwise
+dProcess: true indicates display process FD table, false otherwise
+dSummary: true indicates display summary table, false otherwise
+dThreshold: true indicates display threshold table, false otherwise
+thresholdVal: the minimum number of fds a process needs to be printed in threshold table
+pid: the process specified by the user, pid if given, -1 otherwise
+returning: this function does not return anything
+*/
 	int numProcesses = getNumProcesses();
 	if(dComposite) {
 		displayCompositeTable(numProcesses, pid);
