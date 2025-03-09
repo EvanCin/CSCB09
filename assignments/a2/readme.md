@@ -52,8 +52,8 @@ __Implementation__ <br />
    checks user arguments, calls updateArg to update boolean values and prints the tables with a call to displayTables. <br />
 
 
-
-
+__Flow Chart Diagram__ <br />
+![flow chart diagram]()
 
 __How the program was written:__ <br />
 
