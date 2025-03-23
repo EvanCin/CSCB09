@@ -1,9 +1,10 @@
-__README -- Recreating the System-Wide FD Tables__ <br />
+__README -- System Monitoring Tool -- Concurrency and Signals__ <br />
 Author: Evan Chen <br />
-Date: March 7, 2025 <br />
+Date: March 23, 2025 <br />
 
 __ABOUT__ <br />
-This project is about displaying various information about processes and file descriptors in the file systems, specifically under /proc/pid/fd.
+This project is about extending A1 System Monitoring Tool to allow cpu, memory, and cores information to be processed concurrently
+within different processes. Terminate and stop signals from the keyboard are processed differently to match the use case of the program.
 
 __Approach to the problem__ <br />
 1. I investigated /proc/stat and utilized /proc/stat to get the number of processes to know how many processes to iterate over and check if they exist.
