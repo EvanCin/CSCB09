@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include <sys/wait.h>
 
 
 /*Returns the number of cores*/
@@ -123,7 +124,7 @@ void displayMemoryGraph(long totalRam, int samples, int outputRow) {
 	printf("\x1b[%d;%df", outputRow, col);
 	printf(" 0 GB ");
 	for(int i = 0; i < samples+1; i++) {
-		printf("─");
+		printf("\u2500");
 	}
 }
 
@@ -150,14 +151,14 @@ void displayCPUGraph(int samples, int outputRow) {
 	printf("\x1b[%d;%df", outputRow, col);
 	printf("0%% ");
 	for(int i = 0; i < samples+1; i++) {
-		printf("─");
+		printf("\u2500");
 	}
 }
 
 /*Prints numCores cores*/
 void printCores(int numCores) {
 	for(int i = 0; i < numCores; i++) {
-		printf("+──+  ");
+		printf("+\u2500\u2500+  ");
 	}
 	printf("\n");
 	for(int i = 0; i < numCores; i++) {
@@ -165,7 +166,7 @@ void printCores(int numCores) {
 	}
 	printf("\n");
 	for(int i = 0; i < numCores; i++) {
-		printf("+──+  ");
+		printf("+\u2500\u2500+  ");
 	}
 	printf("\n");
 }
@@ -288,6 +289,100 @@ int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCP
 	return -1;
 }
 
+long getTotalRam() {
+	struct sysinfo info;
+    sysinfo(&info);
+ 	long totalram = info.totalram;
+	return totalram;
+}
+double getMemoryPerBarGB() {
+	long totalram = getTotalRam();
+	int totalRamGB = totalram / 1000000000;
+	double memoryPerBarGB = (double) totalRamGB / 12;
+	return memoryPerBarGB;
+}
+
+/*Creates processes and runs concurrently*/
+void createProcessesAndPipes(bool displayCores, bool displayMemory, bool displayCPU, int samples, int tdelay ,int memoryOutputRow, int cpuOutputRow) {
+	if(displayMemory) {
+		displayMemoryGraph(getTotalRam(), samples, memoryOutputRow);
+   }
+   if(displayCPU) {
+		displayCPUGraph(samples, cpuOutputRow);
+   }
+	//Pipe for each output type
+	int pipeMemory[2];
+	int pipeCPU[2];
+	int pipeCores[2];
+	pipe(pipeMemory);
+	pipe(pipeCPU);
+	pipe(pipeCores);
+	//Create processes if needed
+	int pids[3];
+	if(displayMemory) {
+		pids[0] = fork();
+		if(pids[0] == 0) {
+			close(pipeCPU[0]); close(pipeCPU[1]); close(pipeCores[0]); close(pipeCores[1]); close(pipeMemory[0]);
+			struct sysinfo info;
+    		sysinfo(&info);
+			for(int i = 0; i < samples; i++) {
+				double usedRamGB = getMemoryUsage(&info);
+				write(pipeMemory[1], &usedRamGB, sizeof(usedRamGB));
+				usleep(tdelay);
+			}
+			close(pipeMemory[1]);
+			exit(0);
+		}
+	}
+	if(displayCPU) {
+		pids[1] = fork();
+		if(pids[1] == 0) {
+			close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCores[0]); close(pipeCores[1]); close(pipeCPU[0]);
+			double prevTotalCpuTime = 0;
+			double prevIdleTime = 0;
+			getCpuUsage(&prevTotalCpuTime, &prevIdleTime);
+			for(int i = 0; i < samples; i++) {
+				double cpuUsage = getCpuUsage(&prevTotalCpuTime, &prevIdleTime);
+				write(pipeCPU[1], &cpuUsage, sizeof(cpuUsage));
+				usleep(tdelay);
+			}
+			close(pipeCPU[1]);
+			exit(0);
+		}
+	}
+	if(displayCores) {
+		pids[2] = fork();
+		if(pids[2] == 0) {
+			close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCPU[0]); close(pipeCPU[1]); close(pipeCores[0]);
+			//retreive cores and max freq info
+			close(pipeCores[1]);
+			exit(0);
+		}
+	}
+	close(pipeMemory[1]); close(pipeCPU[1]); close(pipeCores[1]);
+	double cpuUsage;
+	double memoryUsage;
+	int i = 0;
+	int read1, read2;
+	read1 = read(pipeMemory[0], &memoryUsage, sizeof(memoryUsage));
+	read2 = read(pipeCPU[0], &cpuUsage, sizeof(cpuUsage));
+	while( read1 > 0 || read2 > 0) {
+		if(read1 != 0) {
+			//updateMemoryGraph(getMemoryPerBarGB(), memoryUsage, i, memoryOutputRow);
+			read1 = read(pipeMemory[0], &memoryUsage, sizeof(memoryUsage));
+		}
+		if(read2 != 0) {
+			//updateCPUGraph(cpuUsage, i, cpuOutputRow);
+			read2 = read(pipeCPU[0], &cpuUsage, sizeof(cpuUsage));
+		}
+		i++;
+		printf("READ1: %d, READ2: %d\n", read1, read2);
+		
+	}
+	waitpid(pids[0], NULL, 0); waitpid(pids[1], NULL, 0); waitpid(pids[2], NULL, 0);
+	close(pipeMemory[0]); close(pipeCPU[0]); close(pipeCores[0]);
+}
+
 /*
 Prints the memory and/or CPU graph
 Input:
@@ -299,20 +394,21 @@ Input:
 	cpuOutputRow: the initial row to print CPU graph
 */
 void displayGraphs(int samples, int tdelay, bool displayMemory, bool displayCPU, int memoryOutputRow, int cpuOutputRow) {
-	double prevTotalCpuTime = 0;
-	double prevIdleTime = 0;
-	getCpuUsage(&prevTotalCpuTime, &prevIdleTime);
-	struct sysinfo info;
-    sysinfo(&info);
- 	long totalram = info.totalram;
- 	int totalRamGB = totalram / 1000000000;
-	double memoryPerBarGB = (double) totalRamGB / 12;
-	if(displayMemory) {
- 		displayMemoryGraph(totalram, samples, memoryOutputRow);
-	}
-	if(displayCPU) {
- 		displayCPUGraph(samples, cpuOutputRow);
-	}
+	createProcessesAndPipes(false, displayMemory, displayCPU, samples, tdelay, memoryOutputRow, cpuOutputRow);
+	// double prevTotalCpuTime = 0;
+	// double prevIdleTime = 0;
+	// getCpuUsage(&prevTotalCpuTime, &prevIdleTime);
+	// struct sysinfo info;
+    // sysinfo(&info);
+ 	// long totalram = info.totalram;
+ 	// int totalRamGB = totalram / 1000000000;
+	// double memoryPerBarGB = (double) totalRamGB / 12;
+	// if(displayMemory) {
+ 	// 	displayMemoryGraph(totalram, samples, memoryOutputRow);
+	// }
+	// if(displayCPU) {
+ 	// 	displayCPUGraph(samples, cpuOutputRow);
+	// }
  	// for(int i = 0; i < samples; i++) {
 	// 	if(displayMemory) {
  	// 		double usedRamGB = getMemoryUsage(&info);
@@ -324,76 +420,74 @@ void displayGraphs(int samples, int tdelay, bool displayMemory, bool displayCPU,
  	// 	usleep(tdelay);
  	// }
 	/*We want to do the computations concurrently and pass back to parent via pipes*/
-	int cpuUsagePipe[2];
-	int memoryUsagePipe[2];
-	if(pipe(cpuUsagePipe) == -1 || pipe(memoryUsagePipe) == -1) {
-		fprintf(stderr, "Pipe failure");
-		exit(1);
-	}
-	//Check if we need to create child process to retrieve cpu usage info
-	if(displayCPU) {
-		int pid = fork();
-		if(pid == 0) {
-			//Close read end of pipe
-			if(close(cpuUsagePipe[0]) == -1) {
-				fprintf(stderr, "Close pipe failure");
-				exit(1);
-			}
-			close(memoryUsagePipe[0]); close(memoryUsagePipe[1]);
-			//Get the samples and write to pipe
-			for(int i = 0; i < samples; i++) {
-				double cpuUsage = getCpuUsage(&prevTotalCpuTime, &prevIdleTime);
-				write(cpuUsagePipe[1], &cpuUsage, sizeof(cpuUsage));
-				usleep(tdelay);
-			}
-			close(cpuUsagePipe[1]);
-			exit(0);
-		} else {
-			//Parent so close write end of pipe
-			if(close(cpuUsagePipe[1]) == -1) {
-				fprintf(stderr, "Close pipe failure");
-				exit(1);
-			}
-		}
-	}
-	if(displayMemory) {
-		int pid = fork();
-		if(pid == 0) {
-			close(memoryUsagePipe[0]); close(cpuUsagePipe[0]); close(cpuUsagePipe[1]);
-			for(int i = 0; i < samples; i++) {
-				double usedRamGB = getMemoryUsage(&info);
-				write(memoryUsagePipe[1], &usedRamGB, sizeof(usedRamGB));
-				usleep(tdelay);
-			}
-			close(memoryUsagePipe[0]);
-			exit(0);
-		} else {
-			close(memoryUsagePipe[1]);
-		}
-	}
-	
-	
+	// int cpuUsagePipe[2];
+	// int memoryUsagePipe[2];
+	// if(pipe(cpuUsagePipe) == -1 || pipe(memoryUsagePipe) == -1) {
+	// 	fprintf(stderr, "Pipe failure");
+	// 	exit(1);
+	// }
+	// if(displayMemory) {
+	// 	int pid = fork();
+	// 	if(pid == 0) {
+	// 		close(memoryUsagePipe[0]); close(cpuUsagePipe[0]); close(cpuUsagePipe[1]);
+	// 		for(int i = 0; i < samples; i++) {
+	// 			double usedRamGB = getMemoryUsage(&info);
+	// 			write(memoryUsagePipe[1], &usedRamGB, sizeof(usedRamGB));
+	// 			usleep(tdelay);
+	// 		}
+	// 		close(memoryUsagePipe[0]);
+	// 		exit(0);
+	// 	} else {
+	// 		close(memoryUsagePipe[1]);
+	// 	}
+	// }
+	// //Check if we need to create child process to retrieve cpu usage info
+	// if(displayCPU) {
+	// 	int pid = fork();
+	// 	if(pid == 0) {
+	// 		//Close read end of pipe
+	// 		if(close(cpuUsagePipe[0]) == -1) {
+	// 			fprintf(stderr, "Close pipe failure");
+	// 			exit(1);
+	// 		}
+	// 		close(memoryUsagePipe[0]); close(memoryUsagePipe[1]);
+	// 		//Get the samples and write to pipe
+	// 		for(int i = 0; i < samples; i++) {
+	// 			double cpuUsage = getCpuUsage(&prevTotalCpuTime, &prevIdleTime);
+	// 			write(cpuUsagePipe[1], &cpuUsage, sizeof(cpuUsage));
+	// 			usleep(tdelay);
+	// 		}
+	// 		close(cpuUsagePipe[1]);
+	// 		exit(0);
+	// 	} else {
+	// 		//Parent so close write end of pipe
+	// 		if(close(cpuUsagePipe[1]) == -1) {
+	// 			fprintf(stderr, "Close pipe failure");
+	// 			exit(1);
+	// 		}
+	// 	}
+	// }
 
-	//In parent we want to keep reading from the pipes
-	double cpuUsage;
-	double memoryUsage;
-	int i = 0;
-	int read1, read2;
-	read1 = read(cpuUsagePipe[0], &cpuUsage, sizeof(cpuUsage));
-	read2 = read(memoryUsagePipe[0], &memoryUsage, sizeof(memoryUsage));
-	while( read1 > 0 || read2 > 0) {
-		if(read1 != 0) {
-			updateCPUGraph(cpuUsage, i, cpuOutputRow);
-		}
-		if(read2 != 0) {
-			updateMemoryGraph(memoryPerBarGB, memoryUsage, i, memoryOutputRow);
-		}
-		read1 = read(cpuUsagePipe[0], &cpuUsage, sizeof(cpuUsage));
-		read2 = read(memoryUsagePipe[0], &memoryUsage, sizeof(memoryUsage));
-		i++;
-	}
-	close(cpuUsagePipe[0]);
-	close(memoryUsagePipe[0]);
+	// //In parent we want to keep reading from the pipes
+	// double cpuUsage;
+	// double memoryUsage;
+	// int i = 0;
+	// int read1, read2;
+	// read1 = read(cpuUsagePipe[0], &cpuUsage, sizeof(cpuUsage));
+	// read2 = read(memoryUsagePipe[0], &memoryUsage, sizeof(memoryUsage));
+	// while( read1 > 0 || read2 > 0) {
+	// 	if(read2 != 0) {
+	// 		updateMemoryGraph(memoryPerBarGB, memoryUsage, i, memoryOutputRow);
+	// 	}
+	// 	if(read1 != 0) {
+	// 		updateCPUGraph(cpuUsage, i, cpuOutputRow);
+	// 	}
+	// 	read2 = read(memoryUsagePipe[0], &memoryUsage, sizeof(memoryUsage));
+	// 	read1 = read(cpuUsagePipe[0], &cpuUsage, sizeof(cpuUsage));
+	// 	i++;
+	// }
+	// close(cpuUsagePipe[0]);
+	// close(memoryUsagePipe[0]);
 
 }
 
@@ -446,11 +540,12 @@ void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool disp
 	if(displayMemory || displayCPU) {
 		displayGraphs(samples, tdelay, displayMemory, displayCPU, memoryOutputRow, cpuOutputRow);
 	}
-	if(displayCore) {
-		displayCoreInfo(coreOutputRow);
-		return;
-	}
+	//if(displayCore) {
+	//	displayCoreInfo(coreOutputRow);
+	//	return;
+	//}
 	printf("\x1b[%d;%df", endOutputRow, 1);
+	printf("\x1b[%d;%dfH%d", endOutputRow + 50, 1, endOutputRow);
 }
 
 int main(int argc, char** argv) {
