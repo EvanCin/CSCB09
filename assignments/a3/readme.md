@@ -7,14 +7,9 @@ This project is about extending A1 System Monitoring Tool to allow cpu, memory, 
 within different processes. Terminate and stop signals from the keyboard are processed differently to match the use case of the program.
 
 __Approach to the problem__ <br />
-1. I investigated /proc/stat and utilized /proc/stat to get the number of processes to know how many processes to iterate over and check if they exist.
-2. Each process that is running exists in /proc/pid and through that I was able to find the open file descriptors for each process through /proc/pid/fd.
-3. Made use of dirent.h to open and read directories, specifically the file descriptors for each PID stored
-at /proc/PID/fd.
-4. Referencing https://www.group-ib.com/blog/linux-pro-manipulation/, /proc/PID/fd is a directory
-containing symbolic links for each open file descriptor, thus we can use readlink https://pubs.opengroup.org/onlinepubs/7908799/xsh/readlink.html to read the contents of link and get file name.
-Utilized https://man7.org/linux/man-pages/man5/proc_pid_fd.5.html to learn about what is returned by readlink.
-5. Utilized stat structure and made calls to stat() to get file descriptor info, particularly for getting inode at st_ino in stat struct.
+1. I split the program up into 3 parts: Main (for processing command line input and calling the display functions), <br />
+Computations (for retrieving and calculating the values for various components), <br />
+IO (for using pipes to pass values from Computations between parent and child processes, and displaying info)
 
 __Implementation__ <br />
 1. For implementation, I separated the code into sections that performed getting, checking, updating, and displaying.
