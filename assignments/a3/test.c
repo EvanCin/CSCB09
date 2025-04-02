@@ -138,7 +138,7 @@ void displayCPUGraph(int samples, int outputRow) {
 	int col = 1;
 	printf("\x1b[%d;%df", outputRow, col);
 	printf("v CPU        %%\n");
-	printf("  100%% ");
+	printf("  100%% \n");
 	outputRow += 1;
 	col += 7;
 	int rowsToPrint = outputRow+10;
@@ -360,23 +360,28 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 		}
 	}
 	close(pipeMemory[1]); close(pipeCPU[1]); close(pipeCores[1]);
+
+	//FOR DEBUGGING
+	//printf("PARENT PID: %d, CHILD1 PID: %d, CHILD2 PID: %d, CHILD3 PID: %d\n", getpid(), pids[0], pids[1], pids[2]);
+	//
+
 	double cpuUsage;
 	double memoryUsage;
 	int i = 0;
 	int read1, read2;
 	read1 = read(pipeMemory[0], &memoryUsage, sizeof(memoryUsage));
 	read2 = read(pipeCPU[0], &cpuUsage, sizeof(cpuUsage));
-	while( read1 > 0 || read2 > 0) {
+	while(read1 > 0 || read2 > 0) {
 		if(read1 != 0) {
-			//updateMemoryGraph(getMemoryPerBarGB(), memoryUsage, i, memoryOutputRow);
+			updateMemoryGraph(getMemoryPerBarGB(), memoryUsage, i, memoryOutputRow);
 			read1 = read(pipeMemory[0], &memoryUsage, sizeof(memoryUsage));
 		}
 		if(read2 != 0) {
-			//updateCPUGraph(cpuUsage, i, cpuOutputRow);
+			updateCPUGraph(cpuUsage, i, cpuOutputRow);
 			read2 = read(pipeCPU[0], &cpuUsage, sizeof(cpuUsage));
 		}
 		i++;
-		printf("READ1: %d, READ2: %d\n", read1, read2);
+		// printf("READ1: %d, READ2: %d\n", read1, read2);
 		
 	}
 	waitpid(pids[0], NULL, 0); waitpid(pids[1], NULL, 0); waitpid(pids[2], NULL, 0);
@@ -545,7 +550,7 @@ void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool disp
 	//	return;
 	//}
 	printf("\x1b[%d;%df", endOutputRow, 1);
-	printf("\x1b[%d;%dfH%d", endOutputRow + 50, 1, endOutputRow);
+	//printf("\x1b[%d;%dfH%d", endOutputRow + 50, 1, endOutputRow);
 }
 
 int main(int argc, char** argv) {
