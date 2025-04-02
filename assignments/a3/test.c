@@ -71,7 +71,7 @@ Input:
 Output:
 	Returns the current CPU usage as a percentage
 */
-double getCpuUsage(double* prevTotalCpuTime, double* prevIdleTime) {
+double getCpuUsage(int tdelay) {
 	FILE* readFile;
 	readFile = fopen("/proc/stat", "r");
 	if(readFile == NULL) {
@@ -79,16 +79,25 @@ double getCpuUsage(double* prevTotalCpuTime, double* prevIdleTime) {
 		exit(1);
 	}
 	char cpu[8];
-	double user, nice, system, currIdleTime, iowait, irq, softirq; 
+	double user, nice, system, idle, iowait, irq, softirq; 
+	//Take first sample
 	fscanf(readFile, "%s %le %le %le %le %le %le %le", cpu, &user, &nice, &system,
-												&currIdleTime, &iowait, &irq, &softirq);
+												&idle, &iowait, &irq, &softirq);
+	double T1 = user + nice + system + idle + iowait + irq + softirq;
+	double idleTime1 = idle;
+	double U1 = T1 - idleTime1;
+	usleep(tdelay);
+	//Take second sample
+	rewind(readFile);
+	fscanf(readFile, "%s %le %le %le %le %le %le %le", cpu, &user, &nice, &system,
+												&idle, &iowait, &irq, &softirq);
+	double T2 = user + nice + system + idle + iowait + irq + softirq;
+	double idleTime2 = idle;
+	double U2 = T2 - idleTime2;
+
+	double cpuUsagePercentage = (U2 - U1) / (T2 - T1) * 100;
+
 	fclose(readFile);
-	double currTotalCpuTime = user + nice + system + currIdleTime + iowait + irq + softirq;
-	double updatedTotalCpuTime = currTotalCpuTime - *prevTotalCpuTime;
-	double updatedIdleCpuTime = currIdleTime - *prevIdleTime;
-	*prevTotalCpuTime = currTotalCpuTime;
-	*prevIdleTime = currIdleTime;
-	double cpuUsagePercentage = (1 - ((double)updatedIdleCpuTime / updatedTotalCpuTime)) * 100;
 	return cpuUsagePercentage;
 }
 
@@ -321,6 +330,7 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 	int pids[3];
 	if(displayMemory) {
 		pids[0] = fork();
+		//This child process calculates memory info and writes it to pipeMemory
 		if(pids[0] == 0) {
 			close(pipeCPU[0]); close(pipeCPU[1]); close(pipeCores[0]); close(pipeCores[1]); close(pipeMemory[0]);
 			struct sysinfo info;
@@ -336,15 +346,14 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 	}
 	if(displayCPU) {
 		pids[1] = fork();
+		//This child process calculates cpu usage and writes it to pipeCPU
 		if(pids[1] == 0) {
 			close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCores[0]); close(pipeCores[1]); close(pipeCPU[0]);
 			double prevTotalCpuTime = 0;
 			double prevIdleTime = 0;
-			getCpuUsage(&prevTotalCpuTime, &prevIdleTime);
 			for(int i = 0; i < samples; i++) {
-				double cpuUsage = getCpuUsage(&prevTotalCpuTime, &prevIdleTime);
+				double cpuUsage = getCpuUsage(tdelay);
 				write(pipeCPU[1], &cpuUsage, sizeof(cpuUsage));
-				usleep(tdelay);
 			}
 			close(pipeCPU[1]);
 			exit(0);
@@ -352,6 +361,7 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 	}
 	if(displayCores) {
 		pids[2] = fork();
+		//This child process calculates cores and max freq info and writes it to pipeCores
 		if(pids[2] == 0) {
 			close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCPU[0]); close(pipeCPU[1]); close(pipeCores[0]);
 			//retreive cores and max freq info
@@ -384,116 +394,8 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 		// printf("READ1: %d, READ2: %d\n", read1, read2);
 		
 	}
-	waitpid(pids[0], NULL, 0); waitpid(pids[1], NULL, 0); waitpid(pids[2], NULL, 0);
+	//waitpid(pids[0], NULL, 0); waitpid(pids[1], NULL, 0); waitpid(pids[2], NULL, 0);
 	close(pipeMemory[0]); close(pipeCPU[0]); close(pipeCores[0]);
-}
-
-/*
-Prints the memory and/or CPU graph
-Input:
-	samples: the amount of samples to take
-	tdelay: the delay between each sample
-	displayMemory: if true displays the memory graph with graph values
-	displayCPU: if true displays the CPU graph with graph values
-	memoryOutputRow: the initial row to print memory graph
-	cpuOutputRow: the initial row to print CPU graph
-*/
-void displayGraphs(int samples, int tdelay, bool displayMemory, bool displayCPU, int memoryOutputRow, int cpuOutputRow) {
-	createProcessesAndPipes(false, displayMemory, displayCPU, samples, tdelay, memoryOutputRow, cpuOutputRow);
-	// double prevTotalCpuTime = 0;
-	// double prevIdleTime = 0;
-	// getCpuUsage(&prevTotalCpuTime, &prevIdleTime);
-	// struct sysinfo info;
-    // sysinfo(&info);
- 	// long totalram = info.totalram;
- 	// int totalRamGB = totalram / 1000000000;
-	// double memoryPerBarGB = (double) totalRamGB / 12;
-	// if(displayMemory) {
- 	// 	displayMemoryGraph(totalram, samples, memoryOutputRow);
-	// }
-	// if(displayCPU) {
- 	// 	displayCPUGraph(samples, cpuOutputRow);
-	// }
- 	// for(int i = 0; i < samples; i++) {
-	// 	if(displayMemory) {
- 	// 		double usedRamGB = getMemoryUsage(&info);
- 	//    		updateMemoryGraph(memoryPerBarGB, usedRamGB, i, memoryOutputRow);
- 	// 	}
-	// 	if(displayCPU) {
-	// 		updateCPUGraph(getCpuUsage(&prevTotalCpuTime, &prevIdleTime), i, cpuOutputRow);
- 	// 	}
- 	// 	usleep(tdelay);
- 	// }
-	/*We want to do the computations concurrently and pass back to parent via pipes*/
-	// int cpuUsagePipe[2];
-	// int memoryUsagePipe[2];
-	// if(pipe(cpuUsagePipe) == -1 || pipe(memoryUsagePipe) == -1) {
-	// 	fprintf(stderr, "Pipe failure");
-	// 	exit(1);
-	// }
-	// if(displayMemory) {
-	// 	int pid = fork();
-	// 	if(pid == 0) {
-	// 		close(memoryUsagePipe[0]); close(cpuUsagePipe[0]); close(cpuUsagePipe[1]);
-	// 		for(int i = 0; i < samples; i++) {
-	// 			double usedRamGB = getMemoryUsage(&info);
-	// 			write(memoryUsagePipe[1], &usedRamGB, sizeof(usedRamGB));
-	// 			usleep(tdelay);
-	// 		}
-	// 		close(memoryUsagePipe[0]);
-	// 		exit(0);
-	// 	} else {
-	// 		close(memoryUsagePipe[1]);
-	// 	}
-	// }
-	// //Check if we need to create child process to retrieve cpu usage info
-	// if(displayCPU) {
-	// 	int pid = fork();
-	// 	if(pid == 0) {
-	// 		//Close read end of pipe
-	// 		if(close(cpuUsagePipe[0]) == -1) {
-	// 			fprintf(stderr, "Close pipe failure");
-	// 			exit(1);
-	// 		}
-	// 		close(memoryUsagePipe[0]); close(memoryUsagePipe[1]);
-	// 		//Get the samples and write to pipe
-	// 		for(int i = 0; i < samples; i++) {
-	// 			double cpuUsage = getCpuUsage(&prevTotalCpuTime, &prevIdleTime);
-	// 			write(cpuUsagePipe[1], &cpuUsage, sizeof(cpuUsage));
-	// 			usleep(tdelay);
-	// 		}
-	// 		close(cpuUsagePipe[1]);
-	// 		exit(0);
-	// 	} else {
-	// 		//Parent so close write end of pipe
-	// 		if(close(cpuUsagePipe[1]) == -1) {
-	// 			fprintf(stderr, "Close pipe failure");
-	// 			exit(1);
-	// 		}
-	// 	}
-	// }
-
-	// //In parent we want to keep reading from the pipes
-	// double cpuUsage;
-	// double memoryUsage;
-	// int i = 0;
-	// int read1, read2;
-	// read1 = read(cpuUsagePipe[0], &cpuUsage, sizeof(cpuUsage));
-	// read2 = read(memoryUsagePipe[0], &memoryUsage, sizeof(memoryUsage));
-	// while( read1 > 0 || read2 > 0) {
-	// 	if(read2 != 0) {
-	// 		updateMemoryGraph(memoryPerBarGB, memoryUsage, i, memoryOutputRow);
-	// 	}
-	// 	if(read1 != 0) {
-	// 		updateCPUGraph(cpuUsage, i, cpuOutputRow);
-	// 	}
-	// 	read2 = read(memoryUsagePipe[0], &memoryUsage, sizeof(memoryUsage));
-	// 	read1 = read(cpuUsagePipe[0], &cpuUsage, sizeof(cpuUsage));
-	// 	i++;
-	// }
-	// close(cpuUsagePipe[0]);
-	// close(memoryUsagePipe[0]);
-
 }
 
 /*
@@ -543,7 +445,8 @@ void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool disp
 		endOutputRow = 20;
 	}
 	if(displayMemory || displayCPU) {
-		displayGraphs(samples, tdelay, displayMemory, displayCPU, memoryOutputRow, cpuOutputRow);
+		//displayGraphs(samples, tdelay, displayMemory, displayCPU, memoryOutputRow, cpuOutputRow);
+		createProcessesAndPipes(displayCore, displayMemory, displayCPU, samples, tdelay, memoryOutputRow, cpuOutputRow);
 	}
 	//if(displayCore) {
 	//	displayCoreInfo(coreOutputRow);
