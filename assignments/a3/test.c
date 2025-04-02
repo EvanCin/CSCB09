@@ -184,10 +184,9 @@ void printCores(int numCores) {
 This function prints the number of cores as a diagram
 starting at row outputRow and prints the maximum frequency
 */
-void displayCoreInfo(int outputRow) {
-	int numCores = getNumCores();
+void displayCoreInfo(int outputRow, int numCores, double maxFreq) {
 	printf("\x1b[%d;%df", outputRow, 1);
-	printf("v Number of Cores: %d @ %.2f GHz\n", numCores, getMaxFreq());
+	printf("v Number of Cores: %d @ %.2f GHz\n", numCores, maxFreq);
 	int rowsToPrint = numCores / 4;
 	int coresToPrint = numCores % 4;
 	for(int r = 0; r < rowsToPrint; r++) {
@@ -312,7 +311,7 @@ double getMemoryPerBarGB() {
 }
 
 /*Creates processes and runs concurrently*/
-void createProcessesAndPipes(bool displayCores, bool displayMemory, bool displayCPU, int samples, int tdelay ,int memoryOutputRow, int cpuOutputRow) {
+void createProcessesAndPipes(bool displayCores, bool displayMemory, bool displayCPU, int samples, int tdelay ,int memoryOutputRow, int cpuOutputRow, int coreOutputRow) {
 	if(displayMemory) {
 		displayMemoryGraph(getTotalRam(), samples, memoryOutputRow);
    }
@@ -365,6 +364,12 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 		if(pids[2] == 0) {
 			close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCPU[0]); close(pipeCPU[1]); close(pipeCores[0]);
 			//retreive cores and max freq info
+			int numCores;
+			double maxFreq;
+			numCores = getNumCores();
+			maxFreq = getMaxFreq();
+			write(pipeCores[1], &numCores, sizeof(int));
+			write(pipeCores[1], &maxFreq, sizeof(double));
 			close(pipeCores[1]);
 			exit(0);
 		}
@@ -377,8 +382,11 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 
 	double cpuUsage;
 	double memoryUsage;
+	int numCores;
+	double maxFreq;
+
 	int i = 0;
-	int read1, read2;
+	int read1, read2, read3;
 	read1 = read(pipeMemory[0], &memoryUsage, sizeof(memoryUsage));
 	read2 = read(pipeCPU[0], &cpuUsage, sizeof(cpuUsage));
 	while(read1 > 0 || read2 > 0) {
@@ -392,8 +400,17 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 		}
 		i++;
 		// printf("READ1: %d, READ2: %d\n", read1, read2);
-		
 	}
+	
+
+	if(displayCores) {
+		read3 = read(pipeCores[0], &numCores, sizeof(int));
+		if(read3 == 0) perror("No core info from pipe\n");
+		read3 = read(pipeCores[0], &maxFreq, sizeof(double));
+		if(read3 == 0) perror("No max freq info from pipe\n");
+		displayCoreInfo(coreOutputRow, numCores, maxFreq);
+	}
+
 	//waitpid(pids[0], NULL, 0); waitpid(pids[1], NULL, 0); waitpid(pids[2], NULL, 0);
 	close(pipeMemory[0]); close(pipeCPU[0]); close(pipeCores[0]);
 }
@@ -444,15 +461,16 @@ void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool disp
 		coreOutputRow = 3;
 		endOutputRow = 20;
 	}
-	if(displayMemory || displayCPU) {
-		//displayGraphs(samples, tdelay, displayMemory, displayCPU, memoryOutputRow, cpuOutputRow);
-		createProcessesAndPipes(displayCore, displayMemory, displayCPU, samples, tdelay, memoryOutputRow, cpuOutputRow);
-	}
+	// if(displayMemory || displayCPU) {
+	// 	//displayGraphs(samples, tdelay, displayMemory, displayCPU, memoryOutputRow, cpuOutputRow);
+		
+	// }
+	createProcessesAndPipes(displayCore, displayMemory, displayCPU, samples, tdelay, memoryOutputRow, cpuOutputRow, coreOutputRow);
 	//if(displayCore) {
 	//	displayCoreInfo(coreOutputRow);
 	//	return;
 	//}
-	printf("\x1b[%d;%df", endOutputRow, 1);
+	printf("\x1b[%d;%df", endOutputRow + 10, 1);
 	//printf("\x1b[%d;%dfH%d", endOutputRow + 50, 1, endOutputRow);
 }
 
