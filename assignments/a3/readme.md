@@ -3,7 +3,7 @@ Author: Evan Chen <br />
 Date: March 23, 2025 <br />
 
 Rough notes for assignment <br />
-https://linux.die.net/man/2/signal used signal() function with SIG_IGN to ignore SIGTSTP signal (ctrl-z from keyboard) 
+
 
 
 __ABOUT__ <br />
