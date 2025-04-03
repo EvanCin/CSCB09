@@ -2,6 +2,10 @@ __README -- System Monitoring Tool -- Concurrency and Signals__ <br />
 Author: Evan Chen <br />
 Date: March 23, 2025 <br />
 
+Rough notes for assignment <br />
+https://linux.die.net/man/2/signal used signal() function with SIG_IGN to ignore SIGTSTP signal (ctrl-z from keyboard) 
+
+
 __ABOUT__ <br />
 This project is about extending A1 System Monitoring Tool to allow cpu, memory, and cores information to be processed concurrently
 within different processes. Terminate and stop signals from the keyboard are processed differently to match the use case of the program.
