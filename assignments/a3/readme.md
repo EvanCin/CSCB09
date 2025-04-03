@@ -3,7 +3,7 @@ Author: Evan Chen <br />
 Date: March 23, 2025 <br />
 
 Rough notes for assignment <br />
-
+https://man7.org/linux/man-pages/man2/sigaction.2.html set sa_handler to SIG_IGN so that when sigaction() is called with SIGTSTP, the stop signal is ignored. 
 
 
 __ABOUT__ <br />
