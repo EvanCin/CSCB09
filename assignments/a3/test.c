@@ -11,6 +11,30 @@
 #include <sys/wait.h>
 
 
+int pids[4];
+
+void sigIntHandler(int sig) {
+	
+	printf("\n\n\nEnter r to resume, anything else to quit\n");
+	//kill(getpid(), SIGSTOP);
+	char userInput[10];
+	scanf("%9s", userInput);
+	if(strcmp(userInput, "r") == 0) {
+		for(int i = 0; i < 2; i++) {
+			kill(pids[i], SIGCONT);
+		}
+		kill(getpid(), SIGCONT);
+	} else {
+		kill(getpid(), SIGTERM);
+	}
+}
+
+void sigIntHandlerChild(int sig) {
+	kill(getpid(), SIGSTOP);
+	
+} 
+
+
 /*Returns the number of cores*/
 int getNumCores() {
 	FILE* readFile;
@@ -328,11 +352,17 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 	pipe(pipeCores);
 	pipe(pipeFreq);
 	//Create processes if needed
-	int pids[4];
+	
 	if(displayMemory) {
 		pids[0] = fork();
 		//This child process calculates memory info and writes it to pipeMemory
 		if(pids[0] == 0) {
+			struct sigaction newact2;
+		newact2.sa_handler = sigIntHandlerChild;
+		newact2.sa_flags = 0;
+		sigemptyset(&newact2.sa_mask);
+		sigaction(SIGINT, &newact2, NULL);
+		
 			close(pipeCPU[0]); close(pipeCPU[1]); close(pipeCores[0]); close(pipeCores[1]);
 			close(pipeFreq[0]); close(pipeFreq[1]); close(pipeMemory[0]);
 			struct sysinfo info;
@@ -350,6 +380,12 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 		pids[1] = fork();
 		//This child process calculates cpu usage and writes it to pipeCPU
 		if(pids[1] == 0) {
+		struct sigaction newact2;
+		newact2.sa_handler = sigIntHandlerChild;
+		newact2.sa_flags = 0;
+		sigemptyset(&newact2.sa_mask);
+		sigaction(SIGINT, &newact2, NULL);
+		
 			close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCores[0]); close(pipeCores[1]); 
 			close(pipeFreq[0]); close(pipeFreq[1]); close(pipeCPU[0]);
 			double prevTotalCpuTime = 0;
@@ -362,30 +398,30 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 			exit(0);
 		}
 	}
-	if(displayCores) {
-		pids[2] = fork();
-		//This child process calculates cores and max freq info and writes it to pipeCores
-		if(pids[2] == 0) {
-			close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCPU[0]); close(pipeCPU[1]); 
-			close(pipeFreq[0]); close(pipeFreq[1]); close(pipeCores[0]);
-			//retreive cores and max freq info
-			int numCores;
-			numCores = getNumCores();
-			write(pipeCores[1], &numCores, sizeof(int));
-			close(pipeCores[1]);
-			exit(0);
-		}
-		pids[3] = fork();
-		if(pids[3] == 0) {
-			close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCPU[0]); close(pipeCPU[1]); 
-			close(pipeCores[0]); close(pipeCores[1]); close(pipeFreq[0]);
-			double maxFreq;
-			maxFreq = getMaxFreq();
-			write(pipeCores[1], &maxFreq, sizeof(double));
-			close(pipeFreq[1]);
-			exit(0);
-		}
-	}
+	//if(displayCores) {
+	//	pids[2] = fork();
+	//	//This child process calculates cores and max freq info and writes it to pipeCores
+	//	if(pids[2] == 0) {
+	//		close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCPU[0]); close(pipeCPU[1]); 
+	//		close(pipeFreq[0]); close(pipeFreq[1]); close(pipeCores[0]);
+	//		//retreive cores and max freq info
+	//		int numCores;
+	//		numCores = getNumCores();
+	//		write(pipeCores[1], &numCores, sizeof(int));
+	//		close(pipeCores[1]);
+	//		exit(0);
+	//	}
+	//	pids[3] = fork();
+	//	if(pids[3] == 0) {
+	//		close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCPU[0]); close(pipeCPU[1]); 
+	//		close(pipeCores[0]); close(pipeCores[1]); close(pipeFreq[0]);
+	//		double maxFreq;
+	//		maxFreq = getMaxFreq();
+	//		write(pipeCores[1], &maxFreq, sizeof(double));
+	//		close(pipeFreq[1]);
+	//		exit(0);
+	//	}
+	//}
 	close(pipeMemory[1]); close(pipeCPU[1]); close(pipeCores[1]); close(pipeFreq[1]);
 
 	//FOR DEBUGGING
@@ -398,16 +434,24 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 	double maxFreq;
 
 	int i = 0;
+	int samplesReadCPU = 0;
+	int samplesReadMemory = 0;
 	int read1, read2, read3, read4;
 	read1 = read(pipeMemory[0], &memoryUsage, sizeof(memoryUsage));
 	read2 = read(pipeCPU[0], &cpuUsage, sizeof(cpuUsage));
 	while(read1 > 0 || read2 > 0) {
 		if(read1 != 0) {
-			updateMemoryGraph(getMemoryPerBarGB(), memoryUsage, i, memoryOutputRow);
+			if(samplesReadMemory != samples) {
+				updateMemoryGraph(getMemoryPerBarGB(), memoryUsage, i, memoryOutputRow);
+				samplesReadMemory++;
+			}
 			read1 = read(pipeMemory[0], &memoryUsage, sizeof(memoryUsage));
 		}
 		if(read2 != 0) {
-			updateCPUGraph(cpuUsage, i, cpuOutputRow);
+			if(samplesReadCPU != samples) {
+				updateCPUGraph(cpuUsage, i, cpuOutputRow);
+				samplesReadCPU++;
+			}
 			read2 = read(pipeCPU[0], &cpuUsage, sizeof(cpuUsage));
 		}
 		i++;
@@ -487,6 +531,7 @@ void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool disp
 }
 
 
+
 int main(int argc, char** argv) {
 
 	//Set up the signal handlers before creating processes
@@ -495,6 +540,12 @@ int main(int argc, char** argv) {
 	newact.sa_flags = 0;
 	sigemptyset(&newact.sa_mask);
 	sigaction(SIGTSTP, &newact, NULL);
+	
+	struct sigaction newact2;
+	newact2.sa_handler = sigIntHandler;
+	newact2.sa_flags = 0;
+	sigemptyset(&newact2.sa_mask);
+	sigaction(SIGINT, &newact2, NULL);
 	
 	//Default values
 	int samples = 20;
