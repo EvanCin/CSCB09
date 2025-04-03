@@ -322,16 +322,19 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 	int pipeMemory[2];
 	int pipeCPU[2];
 	int pipeCores[2];
+	int pipeFreq[2];
 	pipe(pipeMemory);
 	pipe(pipeCPU);
 	pipe(pipeCores);
+	pipe(pipeFreq);
 	//Create processes if needed
-	int pids[3];
+	int pids[4];
 	if(displayMemory) {
 		pids[0] = fork();
 		//This child process calculates memory info and writes it to pipeMemory
 		if(pids[0] == 0) {
-			close(pipeCPU[0]); close(pipeCPU[1]); close(pipeCores[0]); close(pipeCores[1]); close(pipeMemory[0]);
+			close(pipeCPU[0]); close(pipeCPU[1]); close(pipeCores[0]); close(pipeCores[1]);
+			close(pipeFreq[0]); close(pipeFreq[1]); close(pipeMemory[0]);
 			struct sysinfo info;
     		sysinfo(&info);
 			for(int i = 0; i < samples; i++) {
@@ -347,7 +350,8 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 		pids[1] = fork();
 		//This child process calculates cpu usage and writes it to pipeCPU
 		if(pids[1] == 0) {
-			close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCores[0]); close(pipeCores[1]); close(pipeCPU[0]);
+			close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCores[0]); close(pipeCores[1]); 
+			close(pipeFreq[0]); close(pipeFreq[1]); close(pipeCPU[0]);
 			double prevTotalCpuTime = 0;
 			double prevIdleTime = 0;
 			for(int i = 0; i < samples; i++) {
@@ -362,19 +366,27 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 		pids[2] = fork();
 		//This child process calculates cores and max freq info and writes it to pipeCores
 		if(pids[2] == 0) {
-			close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCPU[0]); close(pipeCPU[1]); close(pipeCores[0]);
+			close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCPU[0]); close(pipeCPU[1]); 
+			close(pipeFreq[0]); close(pipeFreq[1]); close(pipeCores[0]);
 			//retreive cores and max freq info
 			int numCores;
-			double maxFreq;
 			numCores = getNumCores();
-			maxFreq = getMaxFreq();
 			write(pipeCores[1], &numCores, sizeof(int));
-			write(pipeCores[1], &maxFreq, sizeof(double));
 			close(pipeCores[1]);
 			exit(0);
 		}
+		pids[3] = fork();
+		if(pids[3] == 0) {
+			close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCPU[0]); close(pipeCPU[1]); 
+			close(pipeCores[0]); close(pipeCores[1]); close(pipeFreq[0]);
+			double maxFreq;
+			maxFreq = getMaxFreq();
+			write(pipeCores[1], &maxFreq, sizeof(double));
+			close(pipeFreq[1]);
+			exit(0);
+		}
 	}
-	close(pipeMemory[1]); close(pipeCPU[1]); close(pipeCores[1]);
+	close(pipeMemory[1]); close(pipeCPU[1]); close(pipeCores[1]); close(pipeFreq[1]);
 
 	//FOR DEBUGGING
 	//printf("PARENT PID: %d, CHILD1 PID: %d, CHILD2 PID: %d, CHILD3 PID: %d\n", getpid(), pids[0], pids[1], pids[2]);
@@ -386,7 +398,7 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 	double maxFreq;
 
 	int i = 0;
-	int read1, read2, read3;
+	int read1, read2, read3, read4;
 	read1 = read(pipeMemory[0], &memoryUsage, sizeof(memoryUsage));
 	read2 = read(pipeCPU[0], &cpuUsage, sizeof(cpuUsage));
 	while(read1 > 0 || read2 > 0) {
@@ -406,13 +418,13 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 	//if(displayCores) {
 	//	read3 = read(pipeCores[0], &numCores, sizeof(int));
 	//	if(read3 == 0) perror("No core info from pipe\n");
-	//	read3 = read(pipeCores[0], &maxFreq, sizeof(double));
-	//	if(read3 == 0) perror("No max freq info from pipe\n");
+	//	read4 = read(pipeFreq[0], &maxFreq, sizeof(double));
+	//	if(read4 == 0) perror("No max freq info from pipe\n");
 	//	displayCoreInfo(coreOutputRow, numCores, maxFreq);
 	//}
 
 	//waitpid(pids[0], NULL, 0); waitpid(pids[1], NULL, 0); waitpid(pids[2], NULL, 0);
-	close(pipeMemory[0]); close(pipeCPU[0]); close(pipeCores[0]);
+	close(pipeMemory[0]); close(pipeCPU[0]); close(pipeCores[0]); close(pipeFreq[0]);
 }
 
 /*
