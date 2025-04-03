@@ -403,13 +403,13 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 	}
 	
 
-	if(displayCores) {
-		read3 = read(pipeCores[0], &numCores, sizeof(int));
-		if(read3 == 0) perror("No core info from pipe\n");
-		read3 = read(pipeCores[0], &maxFreq, sizeof(double));
-		if(read3 == 0) perror("No max freq info from pipe\n");
-		displayCoreInfo(coreOutputRow, numCores, maxFreq);
-	}
+	//if(displayCores) {
+	//	read3 = read(pipeCores[0], &numCores, sizeof(int));
+	//	if(read3 == 0) perror("No core info from pipe\n");
+	//	read3 = read(pipeCores[0], &maxFreq, sizeof(double));
+	//	if(read3 == 0) perror("No max freq info from pipe\n");
+	//	displayCoreInfo(coreOutputRow, numCores, maxFreq);
+	//}
 
 	//waitpid(pids[0], NULL, 0); waitpid(pids[1], NULL, 0); waitpid(pids[2], NULL, 0);
 	close(pipeMemory[0]); close(pipeCPU[0]); close(pipeCores[0]);
@@ -474,7 +474,16 @@ void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool disp
 	//printf("\x1b[%d;%dfH%d", endOutputRow + 50, 1, endOutputRow);
 }
 
+
 int main(int argc, char** argv) {
+
+	//Set up the signal handlers before creating processes
+	struct sigaction newact;
+	newact.sa_handler = SIG_IGN;
+	newact.sa_flags = 0;
+	sigemptyset(&newact.sa_mask);
+	sigaction(SIGTSTP, &newact, NULL);
+	
 	//Default values
 	int samples = 20;
 	int tdelay = 500000;
