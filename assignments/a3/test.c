@@ -11,7 +11,6 @@
 #include <sys/wait.h>
 
 
-int pids[4];
 
 void sigIntHandler(int sig) {
 	
@@ -20,10 +19,7 @@ void sigIntHandler(int sig) {
 	char userInput[10];
 	scanf("%9s", userInput);
 	if(strcmp(userInput, "r") == 0) {
-		for(int i = 0; i < 2; i++) {
-			kill(pids[i], SIGCONT);
-		}
-		kill(getpid(), SIGCONT);
+		kill(0, SIGCONT);
 	} else {
 		kill(getpid(), SIGTERM);
 	}
@@ -33,6 +29,7 @@ void sigIntHandlerChild(int sig) {
 	kill(getpid(), SIGSTOP);
 	
 } 
+
 
 
 /*Returns the number of cores*/
@@ -352,6 +349,7 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 	pipe(pipeCores);
 	pipe(pipeFreq);
 	//Create processes if needed
+	int pids[4];
 	
 	if(displayMemory) {
 		pids[0] = fork();
