@@ -1,8 +1,9 @@
+#define _DEFAULT_SOURCE
 #include "signals.h"
 
 void sigIntHandler(int sig) {
-	
-	printf("\n\n\nEnter r to resume, anything else to quit\n");
+	printf("\x1b[%d;%df\n", 50, 2);
+	printf("  Enter r to resume, anything else to quit\n");
 	//kill(getpid(), SIGSTOP);
 	char userInput[10];
 	scanf("%9s", userInput);

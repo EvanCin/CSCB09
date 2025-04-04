@@ -16,6 +16,7 @@
 
 
 int main(int argc, char** argv) {
+	signalSetup();
 	//Default values
 	int samples = 20;
 	int tdelay = 500000;

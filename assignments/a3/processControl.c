@@ -231,7 +231,7 @@ void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool disp
 	int memoryOutputRow = 3;
 	int cpuOutputRow;
 	int coreOutputRow;
-	int endOutputRow;
+	//int endOutputRow;
 	if(!displayMemory && !displayCPU && !displayCore) {
 		displayMemory = true;
 		displayCPU = true;
@@ -245,24 +245,24 @@ void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool disp
 	if(displayMemory) {
 		cpuOutputRow = 18;
 		coreOutputRow = 18;
-		endOutputRow = 20;
+		//endOutputRow = 20;
 		if(displayCPU) {
 			coreOutputRow = 32;
-			endOutputRow = 40;
+			//endOutputRow = 40;
 		}
 		if(displayCore) {
-			endOutputRow = 40;
+			//endOutputRow = 40;
 		}
 	} else if(displayCPU) {
 		cpuOutputRow = 3;
 		coreOutputRow = 18;
-		endOutputRow = 20;
+		//endOutputRow = 20;
 		if(displayCore) {
-			endOutputRow = 40;
+			//endOutputRow = 40;
 		}
 	} else if(displayCore) {
 		coreOutputRow = 3;
-		endOutputRow = 20;
+		//endOutputRow = 20;
 	}
 	// if(displayMemory || displayCPU) {
 	// 	//displayGraphs(samples, tdelay, displayMemory, displayCPU, memoryOutputRow, cpuOutputRow);
@@ -273,6 +273,6 @@ void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool disp
 	//	displayCoreInfo(coreOutputRow);
 	//	return;
 	//}
-	printf("\x1b[%d;%df", endOutputRow + 10, 1);
+	printf("\x1b[%d;%df", 60, 1);
 	//printf("\x1b[%d;%dfH%d", endOutputRow + 50, 1, endOutputRow);
 }
