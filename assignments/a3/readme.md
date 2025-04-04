@@ -4,6 +4,7 @@ Date: March 23, 2025 <br />
 
 Rough notes for assignment <br />
 https://man7.org/linux/man-pages/man2/sigaction.2.html set sa_handler to SIG_IGN so that when sigaction() is called with SIGTSTP, the stop signal is ignored. 
+https://www.ibm.com/docs/en/zos/2.4.0?topic=functions-kill-send-signal-process found if pid is equal to 0, then kill sends its signal to all processes with the same process group ID as the sender. In my implementation, only the parent process will be calling the particular signal handling function so by saying kill(0, signal) I am able to send signal to the child processes.
 
 
 __ABOUT__ <br />
