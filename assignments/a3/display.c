@@ -1,4 +1,9 @@
-
+// #include <stdbool.h>
+// #include <stdio.h>
+// #include <string.h>
+// #include <ctype.h>
+// #include <stdlib.h>
+#include "display.h"
 
 /*Prints the number of samples and prints tdelay as microseconds and as seconds*/
 void displayParameters(int samples, int microsecondsTdelay) {
@@ -131,67 +136,4 @@ void updateCPUGraph(double cpuUsage, int currCol, int outputRow) {
 	}
 	printf("\x1b[%d;%df", outputRow - currRow, 9 + currCol);
 	printf(":\n");
-}
-
-/*Returns true if str is a number, false otherwise*/
-bool isNumber(const char* str) {
-	for(int i = 0; str[i] != '\0'; i++) {
-		if(!isdigit(str[i])) {
-			return false;
-		}
-	}
-	return true;
-}
-
-/*
-This function checks if input is a valid command line argument and
-updates the corresponding value
-Input:
-	samples: pointer to the samples value
-	tdelay: pointer to the tdelay value
-	displayMemory: if true memory graph will be displayed
-	displayCPU: if true cpu graph will be displayed
-	displayCore: if true core info will be displayed
-	input: input command line argument
-Output:
-	1 if input is valid argument, -1 otherwise
-*/
-int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCPU, bool* displayCore, char* input) {
-	if(strcmp(input, "--memory") == 0) {
-		*displayMemory = true;
-		return 1;
-	} else if(strcmp(input, "--cpu") == 0) {
-		*displayCPU = true;
-		return 1;
-	} else if(strcmp(input, "--cores") == 0) {
-		*displayCore = true;
-		return 1;
-	}
-	int strlen = 0;
-	int startOfNum = 0;
-	while(input[strlen] != '\0') {
-		if(input[strlen] == '=') {
-			startOfNum = strlen + 1;
-		}
-		strlen++;
-	}
-	char secondHalfInput[strlen];
-	int inputNum;
-	strncpy(secondHalfInput, input+startOfNum, strlen);
-	if(!isNumber(secondHalfInput)) {
-		return -1;
-	} else {
-		inputNum = atoi(secondHalfInput);
-	}
-	char firstHalfInput[strlen];
-	strcpy(firstHalfInput, input);
-	firstHalfInput[startOfNum-1] = '\0';
-	if(strcmp(firstHalfInput, "--samples") == 0) {
-		*samples = inputNum;
-		return 1;
-	} else if(strcmp(firstHalfInput, "--tdelay") == 0) {
-		*tdelay = inputNum;
-		return 1;
-	}
-	return -1;
 }

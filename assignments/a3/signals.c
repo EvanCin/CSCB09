@@ -1,3 +1,5 @@
+#include "signals.h"
+
 void sigIntHandler(int sig) {
 	
 	printf("\n\n\nEnter r to resume, anything else to quit\n");

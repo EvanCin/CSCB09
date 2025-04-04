@@ -1,5 +1,11 @@
-#include <stdio.h>
-#include <sys/sysinfo.h>
+// #define _DEFAULT_SOURCE //For unistd.h and usleep()
+// #include <stdio.h>
+// #include <sys/sysinfo.h>
+// #include <string.h>
+// #include <stdlib.h>
+// #include <unistd.h>
+#define _DEFAULT_SOURCE //For unistd.h and usleep()
+#include "computations.h"
 
 /*Returns the number of cores*/
 int getNumCores() {
