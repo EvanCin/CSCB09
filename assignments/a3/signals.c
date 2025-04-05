@@ -1,22 +1,21 @@
 #define _DEFAULT_SOURCE
 #include "signals.h"
 
+
 void sigIntHandler(int sig) {
-	printf("\x1b[%d;%df\n", 50, 2);
+	printf("\x1b[%d;%df\n", 30, 2);
 	printf("  Enter r to resume, anything else to quit\n");
-	//kill(getpid(), SIGSTOP);
 	char userInput[10];
 	scanf("%9s", userInput);
 	if(strcmp(userInput, "r") == 0) {
 		kill(0, SIGCONT);
 	} else {
-		kill(getpid(), SIGTERM);
+		kill(0, SIGTERM);
 	}
 }
 
 void sigIntHandlerChild(int sig) {
 	kill(getpid(), SIGSTOP);
-	
 } 
 
 void signalSetup() {

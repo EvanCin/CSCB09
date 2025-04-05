@@ -145,30 +145,30 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 			exit(0);
 		}
 	}
-	if(displayCores) {
-		pids[2] = fork();
-		//This child process calculates cores and max freq info and writes it to pipeCores
-		if(pids[2] == 0) {
-			close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCPU[0]); close(pipeCPU[1]); 
-			close(pipeFreq[0]); close(pipeFreq[1]); close(pipeCores[0]);
-			//retreive cores and max freq info
-			int numCores;
-			numCores = getNumCores();
-			write(pipeCores[1], &numCores, sizeof(int));
-			close(pipeCores[1]);
-			exit(0);
-		}
-		pids[3] = fork();
-		if(pids[3] == 0) {
-			close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCPU[0]); close(pipeCPU[1]); 
-			close(pipeCores[0]); close(pipeCores[1]); close(pipeFreq[0]);
-			double maxFreq;
-			maxFreq = getMaxFreq();
-			write(pipeFreq[1], &maxFreq, sizeof(double));
-			close(pipeFreq[1]);
-			exit(0);
-		}
-	}
+	//if(displayCores) {
+	//	pids[2] = fork();
+	//	//This child process calculates cores and max freq info and writes it to pipeCores
+	//	if(pids[2] == 0) {
+	//		close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCPU[0]); close(pipeCPU[1]); 
+	//		close(pipeFreq[0]); close(pipeFreq[1]); close(pipeCores[0]);
+	//		//retreive cores and max freq info
+	//		int numCores;
+	//		numCores = getNumCores();
+	//		write(pipeCores[1], &numCores, sizeof(int));
+	//		close(pipeCores[1]);
+	//		exit(0);
+	//	}
+	//	pids[3] = fork();
+	//	if(pids[3] == 0) {
+	//		close(pipeMemory[0]); close(pipeMemory[1]); close(pipeCPU[0]); close(pipeCPU[1]); 
+	//		close(pipeCores[0]); close(pipeCores[1]); close(pipeFreq[0]);
+	//		double maxFreq;
+	//		maxFreq = getMaxFreq();
+	//		write(pipeFreq[1], &maxFreq, sizeof(double));
+	//		close(pipeFreq[1]);
+	//		exit(0);
+	//	}
+	//}
 	close(pipeMemory[1]); close(pipeCPU[1]); close(pipeCores[1]); close(pipeFreq[1]);
 
 	//FOR DEBUGGING
@@ -177,16 +177,17 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 
 	double cpuUsage;
 	double memoryUsage;
-	int numCores;
-	double maxFreq;
+	//int numCores;
+	//double maxFreq;
 
 	int i = 0;
 	int samplesReadCPU = 0;
 	int samplesReadMemory = 0;
-	int read1, read2, read3, read4;
+	int read1, read2;
+	//int read3, read4;
 	read1 = read(pipeMemory[0], &memoryUsage, sizeof(memoryUsage));
 	read2 = read(pipeCPU[0], &cpuUsage, sizeof(cpuUsage));
-	while(read1 > 0 || read2 > 0) {
+	while(read1 != 0 || read2 != 0) {
 		if(read1 != 0) {
 			if(samplesReadMemory != samples) {
 				updateMemoryGraph(getMemoryPerBarGB(), memoryUsage, i, memoryOutputRow);
@@ -206,13 +207,13 @@ void createProcessesAndPipes(bool displayCores, bool displayMemory, bool display
 	}
 	
 
-	if(displayCores) {
-		read3 = read(pipeCores[0], &numCores, sizeof(int));
-		if(read3 == 0) perror("No core info from pipe\n");
-		read4 = read(pipeFreq[0], &maxFreq, sizeof(double));
-		if(read4 == 0) perror("No max freq info from pipe\n");
-		displayCoreInfo(coreOutputRow, numCores, maxFreq);
-	}
+	//if(displayCores) {
+	//	read3 = read(pipeCores[0], &numCores, sizeof(int));
+	//	if(read3 == 0) perror("No core info from pipe\n");
+	//	read4 = read(pipeFreq[0], &maxFreq, sizeof(double));
+	//	if(read4 == 0) perror("No max freq info from pipe\n");
+	//	displayCoreInfo(coreOutputRow, numCores, maxFreq);
+	//}
 
 	//waitpid(pids[0], NULL, 0); waitpid(pids[1], NULL, 0); waitpid(pids[2], NULL, 0);
 	close(pipeMemory[0]); close(pipeCPU[0]); close(pipeCores[0]); close(pipeFreq[0]);
