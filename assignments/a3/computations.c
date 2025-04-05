@@ -1,13 +1,6 @@
-// #define _DEFAULT_SOURCE //For unistd.h and usleep()
-// #include <stdio.h>
-// #include <sys/sysinfo.h>
-// #include <string.h>
-// #include <stdlib.h>
-// #include <unistd.h>
 #define _DEFAULT_SOURCE //For unistd.h and usleep()
 #include "computations.h"
 
-/*Returns the number of cores*/
 int getNumCores() {
 	FILE* readFile;
 	int numCores = 0;
@@ -28,7 +21,6 @@ int getNumCores() {
 	return numCores;
 }
 
-/*Returns the maximum frequency*/
 double getMaxFreq() {
 	FILE* readFile;
 	readFile = fopen("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", "r");
@@ -41,14 +33,6 @@ double getMaxFreq() {
 	return maxFreqGhz /= 1000000;
 }
 
-/*
-This function calls sysinfo() to get current memory status and
-calculates current memory usage
-Input: 
-	info: a pointer to a struct sysinfo
-Output: 
-	Returns the memory usage in GB
-*/
 double getMemoryUsage(struct sysinfo* info) {
 	sysinfo(info);
 	long totalRam = info->totalram;
@@ -58,15 +42,6 @@ double getMemoryUsage(struct sysinfo* info) {
 	return memoryUsageGB;
 }
 
-/*
-This function reads from /proc/stat to get CPU times and
-calculates the current CPU usage
-Input:
-	prevTotalCpuTime: a pointer to the cpu time of the last sample
-	prevIdleTime: a pointer to the idle time of the last sample
-Output:
-	Returns the current CPU usage as a percentage
-*/
 double getCpuUsage(int tdelay) {
 	FILE* readFile;
 	readFile = fopen("/proc/stat", "r");
@@ -90,9 +65,7 @@ double getCpuUsage(int tdelay) {
 	double T2 = user + nice + system + idle + iowait + irq + softirq;
 	double idleTime2 = idle;
 	double U2 = T2 - idleTime2;
-
 	double cpuUsagePercentage = (U2 - U1) / (T2 - T1) * 100;
-
 	fclose(readFile);
 	return cpuUsagePercentage;
 }

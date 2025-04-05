@@ -1,23 +1,10 @@
-// #include <stdbool.h>
-// #include <stdio.h>
-// #include <string.h>
-// #include <ctype.h>
-// #include <stdlib.h>
 #include "display.h"
 
-/*Prints the number of samples and prints tdelay as microseconds and as seconds*/
 void displayParameters(int samples, int microsecondsTdelay) {
 	double secondsTdelay = (double) microsecondsTdelay / 1000000;
 	printf("Nbr of samples: %d -- every %d microSecs (%.3f secs)\n\n", samples, microsecondsTdelay, secondsTdelay);
 }
 
-/*
-This function displays the memory graph with no data
-Input:
-	totalRam: the total ram in bytes
-	samples: number of samples to take
-	outputRow: the initial row for printing
-*/
 void displayMemoryGraph(long totalRam, int samples, int outputRow) {
 	int col = 1;
 	double totalRamGB = (double) totalRam / 1000000000;
@@ -41,12 +28,6 @@ void displayMemoryGraph(long totalRam, int samples, int outputRow) {
 	}
 }
 
-/*
-This function displays the CPU graph with no data
-Input:
-	samples: number of samples to take
-	outputRow: the initial row for printing
-*/
 void displayCPUGraph(int samples, int outputRow) {
 	int col = 1;
 	printf("\x1b[%d;%df", outputRow, col);
@@ -68,7 +49,6 @@ void displayCPUGraph(int samples, int outputRow) {
 	}
 }
 
-/*Prints numCores cores*/
 void printCores(int numCores) {
 	for(int i = 0; i < numCores; i++) {
 		printf("+\u2500\u2500+  ");
@@ -84,10 +64,6 @@ void printCores(int numCores) {
 	printf("\n");
 }
 
-/*
-This function prints the number of cores as a diagram
-starting at row outputRow and prints the maximum frequency
-*/
 void displayCoreInfo(int outputRow, int numCores, double maxFreq) {
 	printf("\x1b[%d;%df", outputRow, 1);
 	printf("v Number of Cores: %d @ %.2f GHz\n", numCores, maxFreq);
@@ -99,14 +75,6 @@ void displayCoreInfo(int outputRow, int numCores, double maxFreq) {
 	printCores(coresToPrint);
 }
 
-/*
-This function prints the memory usage from the current sample to the memory graph
-Input:
-	memoryPerBarGB: the amount of GB each bar '|' represents
-	usedRamGB: current ram usage
-	currCol: the current column for printing
-	outputRow: the initial row for printing
-*/
 void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol, int outputRow) {
 	printf("\x1b[%d;%df%.2f", outputRow, 11, usedRamGB);
 	outputRow += 13;
@@ -115,13 +83,6 @@ void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol, int
 	printf("#\n");
 }
 
-/*
-This function prints the CPU usage from the current sample to the CPU graph
-Input:
-	cpuUsage: current CPU usage
-	currCol: the current column for printing
-	outputRow: the initial row for printing
-*/
 void updateCPUGraph(double cpuUsage, int currCol, int outputRow) {
 	if(cpuUsage < 0) {
 		cpuUsage = 0;

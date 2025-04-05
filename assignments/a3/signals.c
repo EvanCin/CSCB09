@@ -1,7 +1,6 @@
 #define _DEFAULT_SOURCE
 #include "signals.h"
 
-
 void sigIntHandler(int sig) {
 	printf("\x1b[%d;%df\n", 30, 2);
 	printf("  Enter r to resume, anything else to quit\n");
@@ -30,4 +29,12 @@ void signalSetup() {
 	newact2.sa_flags = 0;
 	sigemptyset(&newact2.sa_mask);
 	sigaction(SIGINT, &newact2, NULL);
+}
+
+void signalSetupChild() {
+	struct sigaction newact;
+	newact.sa_handler = sigIntHandlerChild;
+	newact.sa_flags = 0;
+	sigemptyset(&newact.sa_mask);
+	sigaction(SIGINT, &newact, NULL);
 }

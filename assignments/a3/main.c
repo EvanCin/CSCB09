@@ -1,19 +1,7 @@
-// #define _DEFAULT_SOURCE //For unistd.h and usleep()
-// #include <stdio.h>
-// #include <stdlib.h>
-// #include <math.h>
-// #include <sys/sysinfo.h>
-// #include <sys/utsname.h>
-// #include <string.h>
-// #include <unistd.h>
-// #include <stdbool.h>
-// #include <ctype.h>
-// #include <sys/wait.h>
 #include "computations.h"
 #include "display.h"
 #include "processControl.h"
 #include "signals.h"
-
 
 int main(int argc, char** argv) {
 	signalSetup();
