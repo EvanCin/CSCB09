@@ -225,5 +225,5 @@ void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool disp
 		endOutputRow = 20;
 	}
 	createProcessesAndPipes(displayCore, displayMemory, displayCPU, samples, tdelay, memoryOutputRow, cpuOutputRow, coreOutputRow);
-	printf("\x1b[%d;%df", endOutputRow + 10, 1);
+	printf("\x1b[%d;%df", endOutputRow + 14, 1);
 }
