@@ -1,6 +1,6 @@
 __README -- System Monitoring Tool -- Concurrency and Signals__ <br />
 Author: Evan Chen <br />
-Date: March 23, 2025 <br />
+Date: April 5, 2025 <br />
 
 Rough notes for assignment <br />
 https://man7.org/linux/man-pages/man2/sigaction.2.html set sa_handler to SIG_IGN so that when sigaction() is called with SIGTSTP, the stop signal is ignored. 
@@ -8,13 +8,15 @@ https://www.ibm.com/docs/en/zos/2.4.0?topic=functions-kill-send-signal-process f
 
 
 __ABOUT__ <br />
-This project is about extending A1 System Monitoring Tool to allow cpu, memory, and cores information to be processed concurrently
-within different processes. Terminate and stop signals from the keyboard are processed differently to match the use case of the program.
+This project is about extending A1 System Monitoring Tool to allow cpu, memory, cores, and max frequency information to be processed concurrently within different processes. Terminate and stop signals from the keyboard are processed differently to match the use case of the program.
 
 __Approach to the problem__ <br />
-1. I split the program up into 3 parts: Main (for processing command line input and calling the display functions), <br />
+1. I split the program up into 5 parts: Main (for processing command line input and calling the display functions), <br />
 Computations (for retrieving and calculating the values for various components), <br />
-IO (for using pipes to pass values from Computations between parent and child processes, and displaying info)
+Display (for displaying the memory and cpu graphs, and cores and max frequency info), <br />
+Process Control (for using pipes to pass values between parent and child processes, and displaying computed info) <br />
+Signals (for handling various signals) <br />
+2. 
 
 __Implementation__ <br />
 1. For implementation, I separated the code into sections that performed getting, checking, updating, and displaying.
