@@ -55,7 +55,7 @@ __Flow Chart Diagram__ <br />
 
 __How To Use Program:__ <br />
 1. To compile code: make <br />
-2. makefile uses ccflags -std=c99, -Wall, -Werror, -D_POSIX_C_SOURCE=200809L (for readlink, more details in Notes section) <br />
+2. makefile uses ccflags -std=c99, -Wall, -Werror <br />
 3. To run: ./showFDtables [pid] [--per-process] [--systemWide] [--Vnodes] [--composite] [--summary] [--threshold=X] <br />
 
 __Expected Results__ <br />
