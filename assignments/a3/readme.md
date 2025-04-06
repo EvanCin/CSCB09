@@ -28,27 +28,27 @@ __Implementation__ <br />
    display: contains functions for displaying memory, cpu, cores, and max frequency information
    process control: contains functions for updating what values to display and managing processes and pipes
    signals: contains functions for setting up new signal handlers
-4. __int getNumCores()__: This function retrieves the number of cores from files
-   __double getMaxFreq()__: This function retrieves the maximum frequency from files
-   __double getMemoryUsage(struct sysinfo* info)__: This function retrieves the current system memory usage by using struct sysinfo to get the system information.
-   __double getCpuUsage(int tdelay)__: This function retrieves the current cpu usage by taking a sample at time t1 and a sample at time t2 such that there is a delay of tdelay between the two samples. For the samples, we take the total cpu utilization time (T1 and T2) and subtract the idle time to get U1 and U2 respectively. Then we calculate the cpu usage as (U2-U1)/(T2-T1) * 100.
-   __void displayParameters(int samples, int microsecondsTdelay)__: This function displays the user specified parameters, samples and microseconds of tdelay
-   __void displayMemoryGraph(long totalRam, int samples, int outputRow)__: This function displays the memory graph in its initial state without any points graphed
-   __void displayCPUGraph(int samples, int outputRow)__: This function displays the cpu graph in its initial state without any points graphed
-   __void printCores(int numCores)__: This function prints numCores cores
-   __void displayCoreInfo(int outputRow, int numCores, double maxFreq)__: This function displays the number of cores and the maximum frequency of the system
-   __void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol, int outputRow)__: This function updates the memory graph with the new point which is to be graphed at location column currCol and row outputRow
-   __void updateCPUGraph(double cpuUsage, int currCol, int outputRow)__: This function updates the cpu graph with the new point which is to be graphed at location column currCol and row outputRow
-   __bool isNumber(const char* str)__: This function determines whether str is a number
-   __int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCPU, bool* displayCore, char* input)__: This function determines whether the user input 'input' is a valid input and updates the corresponding boolean accordingly
-   __long getTotalRam()__: This function calculates the total ram of the system
-   __double getMemoryPerBarGB()__: This function calculates the total memory per bar for the memory graph display
-   __void createProcessesAndPipes(bool displayCores, bool displayMemory, bool displayCPU, int samples, int tdelay ,int memoryOutputRow, int cpuOutputRow, int coreOutputRow)__: This function creates a pipe each for the following: memory, cores, and max frequency. Then this function forks to create the four processes and have them each write one of the four pieces of info to the corresponding pipe to the parent process. The parent process keeps reading from the pipes and updating the display until all info is read and the pipes are closed.
-   __void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool displayCPU, bool displayCore)__: This function determines at which lines each piece of information is displayed and calls createProcessesAndPipes to display the information.
-   __void sigIntHandler(int sig)__: This function is the parent processes' handler for the SIGINT signal. It asks the user to input 'r' to continue displaying the graph info and anything else to exit the program. If user inputs 'r', SIGCONT signal is sent to pgid. If user inputs anything else, SIGTERM signal is sent to pgid.
-   __void sigIntHandlerChild(int sig)__: This function is the child process' handler for the SIGINT signal. It sends the child process a SIGSTOP signal to stop its execution until a SIGCONT signal arrives to continue the process, or a SIGTERM signal to arrive to terminate the process.
-   __void signalSetup()__: This function sets up the sigactions to ignore SIGTSTP signals and the new sigIntHandler for SIGINT signals
-   __void signalSetupChild()__: This function sets up the sigaction for the new sigIntHandlerChild for SIGINT signals
+4. __int getNumCores()__: This function retrieves the number of cores from files <br />
+   __double getMaxFreq()__: This function retrieves the maximum frequency from files <br />
+   __double getMemoryUsage(struct sysinfo* info)__: This function retrieves the current system memory usage by using struct sysinfo to get the system information. <br />
+   __double getCpuUsage(int tdelay)__: This function retrieves the current cpu usage by taking a sample at time t1 and a sample at time t2 such that there is a delay of tdelay between the two samples. For the samples, we take the total cpu utilization time (T1 and T2) and subtract the idle time to get U1 and U2 respectively. Then we calculate the cpu usage as (U2-U1)/(T2-T1) * 100. <br />
+   __void displayParameters(int samples, int microsecondsTdelay)__: This function displays the user specified parameters, samples and microseconds of tdelay <br />
+   __void displayMemoryGraph(long totalRam, int samples, int outputRow)__: This function displays the memory graph in its initial state without any points graphed <br />
+   __void displayCPUGraph(int samples, int outputRow)__: This function displays the cpu graph in its initial state without any points graphed <br />
+   __void printCores(int numCores)__: This function prints numCores cores <br />
+   __void displayCoreInfo(int outputRow, int numCores, double maxFreq)__: This function displays the number of cores and the maximum frequency of the system <br />
+   __void updateMemoryGraph(double memoryPerBarGB, double usedRamGB, int currCol, int outputRow)__: This function updates the memory graph with the new point which is to be graphed at location column currCol and row outputRow <br />
+   __void updateCPUGraph(double cpuUsage, int currCol, int outputRow)__: This function updates the cpu graph with the new point which is to be graphed at location column currCol and row outputRow <br />
+   __bool isNumber(const char* str)__: This function determines whether str is a number <br />
+   __int updateValues(int* samples, int* tdelay, bool* displayMemory, bool* displayCPU, bool* displayCore, char* input)__: This function determines whether the user input 'input' is a valid input and updates the corresponding boolean accordingly <br />
+   __long getTotalRam()__: This function calculates the total ram of the system <br />
+   __double getMemoryPerBarGB()__: This function calculates the total memory per bar for the memory graph display <br />
+   __void createProcessesAndPipes(bool displayCores, bool displayMemory, bool displayCPU, int samples, int tdelay ,int memoryOutputRow, int cpuOutputRow, int coreOutputRow)__: This function creates a pipe each for the following: memory, cores, and max frequency. Then this function forks to create the four processes and have them each write one of the four pieces of info to the corresponding pipe to the parent process. The parent process keeps reading from the pipes and updating the display until all info is read and the pipes are closed. <br />
+   __void displayRequestedInfo(int samples, int tdelay, bool displayMemory, bool displayCPU, bool displayCore)__: This function determines at which lines each piece of information is displayed and calls createProcessesAndPipes to display the information. <br />
+   __void sigIntHandler(int sig)__: This function is the parent processes' handler for the SIGINT signal. It asks the user to input 'r' to continue displaying the graph info and anything else to exit the program. If user inputs 'r', SIGCONT signal is sent to pgid. If user inputs anything else, SIGTERM signal is sent to pgid. <br />
+   __void sigIntHandlerChild(int sig)__: This function is the child process' handler for the SIGINT signal. It sends the child process a SIGSTOP signal to stop its execution until a SIGCONT signal arrives to continue the process, or a SIGTERM signal to arrive to terminate the process. <br />
+   __void signalSetup()__: This function sets up the sigactions to ignore SIGTSTP signals and the new sigIntHandler for SIGINT signals <br />
+   __void signalSetupChild()__: This function sets up the sigaction for the new sigIntHandlerChild for SIGINT signals <br />
 
 __Flow Chart Diagram__ <br />
 ![flow chart diagram](https://github.com/user-attachments/assets/a6032db5-2fbc-4034-8f6b-cd91cdf866bf)
