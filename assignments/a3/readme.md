@@ -101,14 +101,14 @@ https://man7.org/linux/man-pages/man2/sigaction.2.html set sa_handler to SIG_IGN
 https://www.ibm.com/docs/en/zos/2.4.0?topic=functions-kill-send-signal-process found if pid is equal to 0, then kill sends its signal to all processes with the same process group ID as the sender. In my implementation, only the parent process will be calling the particular signal handling function so by saying kill(0, signal) I am able to send signal to the child processes since child processes have the same pgid which can be observed through calling 'ps xao pid,ppid,pgid,comm'. <br />
 
 __References__ <br />
-https://man7.org/linux/man-pages/man3/usleep.3.html
-https://man7.org/linux/man-pages/man2/sysinfo.2.html
-https://man7.org/linux/man-pages/man2/sigaction.2.html
-https://www.ibm.com/docs/en/zos/2.4.0?topic=functions-kill-send-signal-process
-https://man7.org/linux/man-pages/man5/proc_cpuinfo.5.html
-https://docs.kernel.org/filesystems/proc.html
-https://man7.org/linux/man-pages/man7/signal.7.html
-https://man7.org/linux/man-pages/man2/kill.2.html
-https://man7.org/linux/man-pages/man2/sigaction.2.html
-https://man7.org/linux/man-pages/man7/pipe.7.html
-https://www.man7.org/linux/man-pages/man2/setpgid.2.html
+https://man7.org/linux/man-pages/man3/usleep.3.html <br />
+https://man7.org/linux/man-pages/man2/sysinfo.2.html <br />
+https://man7.org/linux/man-pages/man2/sigaction.2.html <br />
+https://www.ibm.com/docs/en/zos/2.4.0?topic=functions-kill-send-signal-process <br />
+https://man7.org/linux/man-pages/man5/proc_cpuinfo.5.html <br />
+https://docs.kernel.org/filesystems/proc.html <br />
+https://man7.org/linux/man-pages/man7/signal.7.html <br />
+https://man7.org/linux/man-pages/man2/kill.2.html <br />
+https://man7.org/linux/man-pages/man2/sigaction.2.html <br />
+https://man7.org/linux/man-pages/man7/pipe.7.html <br />
+https://www.man7.org/linux/man-pages/man2/setpgid.2.html <br />
