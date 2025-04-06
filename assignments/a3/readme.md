@@ -56,14 +56,19 @@ __Flow Chart Diagram__ <br />
 __How To Use Program:__ <br />
 1. To compile code: make <br />
 2. makefile uses ccflags -std=c99, -Wall, -Werror <br />
-3. To run: ./showFDtables [pid] [--per-process] [--systemWide] [--Vnodes] [--composite] [--summary] [--threshold=X] <br />
+3. To remove .o files and myMonitoringTool executable use: make clean
+4. To run: ./myMonitoringTool [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T] <br />
 Notes
 Same arguments can be used. ie ./myMonitoringTool --cpu --cpu
 The rightmost values will be used. ie ./myMonitoringTool 20 --samples=30 will run the program with samples = 30
 Another example, ./myMonitoringTool --tdelay=2000 --tdelay=1000 will run the program with tdelay = 1000
 
 __Expected Results__ <br />
-
+The output should always be in the following order (if specified to be displayed by user): user specified or default tdelay and samples ,memory graph, cpu graph, cores and maximum frequency info, cores display. <br />
+If no input, default tdelay = 500000 and default sample = 20, and all info will be displayed. <br />
+If there is some input not for specifying samples or tdelay, then only that info will be displayed. <br />
+When running the program, if ctrl-z is input by user, it is ignored and the program continues execution. <br />
+When running the program, if ctrl-c is input by user, the graphs should stop displaying new values and wait for user input. If user inputs 'r', then continue execution of the program and continue displaying graph values. If user inputs anything other than 'r', then terminate the program.
 
 __Test Cases__ <br />
 Running with invalid/inaccessible pid gives the error message: FD directory of PID [pid] is not accessible <br />
