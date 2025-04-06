@@ -57,16 +57,13 @@ __How To Use Program:__ <br />
 1. To compile code: make <br />
 2. makefile uses ccflags -std=c99, -Wall, -Werror <br />
 3. To run: ./showFDtables [pid] [--per-process] [--systemWide] [--Vnodes] [--composite] [--summary] [--threshold=X] <br />
+Notes
+Same arguments can be used. ie ./myMonitoringTool --cpu --cpu
+The rightmost values will be used. ie ./myMonitoringTool 20 --samples=30 will run the program with samples = 30
+Another example, ./myMonitoringTool --tdelay=2000 --tdelay=1000 will run the program with tdelay = 1000
 
 __Expected Results__ <br />
-./showFDtables displays the composite table for all pids <br />
-./showFDtables [pid] displays the composite table for pid <br />
-./showFDtables --summary displays the summary table for all pids <br />
-./showFDtables [pid] --summary displays the composite table for pid and displays the summary table for all pids <br />
-./showFDtables --threshold=X displays the threshold table for all pids with amount of fds >= X <br />
-./showFDtables [pid] --threshold=X displays the composite table for pid and displays the threshold table for all pids with amount of fds >= X <br />
-./showFDtables --per-process --systemWide --Vnodes --composite displays the per process, system wide, vnodes, and composite tables for all pids <br />
-./showFDtables [pid] --per-process --systemWide --Vnodes --composite displays the per process, system wide, vnodes, and composite tables for only pid <br />
+
 
 __Test Cases__ <br />
 Running with invalid/inaccessible pid gives the error message: FD directory of PID [pid] is not accessible <br />
