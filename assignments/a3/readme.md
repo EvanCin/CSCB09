@@ -106,3 +106,9 @@ https://man7.org/linux/man-pages/man2/sysinfo.2.html
 https://man7.org/linux/man-pages/man2/sigaction.2.html
 https://www.ibm.com/docs/en/zos/2.4.0?topic=functions-kill-send-signal-process
 https://man7.org/linux/man-pages/man5/proc_cpuinfo.5.html
+https://docs.kernel.org/filesystems/proc.html
+https://man7.org/linux/man-pages/man7/signal.7.html
+https://man7.org/linux/man-pages/man2/kill.2.html
+https://man7.org/linux/man-pages/man2/sigaction.2.html
+https://man7.org/linux/man-pages/man7/pipe.7.html
+https://www.man7.org/linux/man-pages/man2/setpgid.2.html
