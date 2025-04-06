@@ -51,7 +51,7 @@ __Implementation__ <br />
    __void signalSetupChild()__: This function sets up the sigaction for the new sigIntHandlerChild for SIGINT signals <br />
 
 __Flow Chart Diagram__ <br />
-![flow chart diagram](https://github.com/user-attachments/assets/a6032db5-2fbc-4034-8f6b-cd91cdf866bf)
+![flow chart diagram](https://github.com/user-attachments/assets/5208b1bd-e815-4610-a9d0-db1603c9280e)
 
 __How To Use Program:__ <br />
 1. To compile code: make <br />
