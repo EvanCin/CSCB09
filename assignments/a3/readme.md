@@ -2,11 +2,6 @@ __README -- System Monitoring Tool -- Concurrency and Signals__ <br />
 Author: Evan Chen <br />
 Date: April 5, 2025 <br />
 
-Rough notes for assignment <br />
-https://man7.org/linux/man-pages/man2/sigaction.2.html set sa_handler to SIG_IGN so that when sigaction() is called with SIGTSTP, the stop signal is ignored. 
-https://www.ibm.com/docs/en/zos/2.4.0?topic=functions-kill-send-signal-process found if pid is equal to 0, then kill sends its signal to all processes with the same process group ID as the sender. In my implementation, only the parent process will be calling the particular signal handling function so by saying kill(0, signal) I am able to send signal to the child processes since child processes have the same pgid which can be observed through calling 'ps xao pid,ppid,pgid,comm'.
-
-
 __ABOUT__ <br />
 This project is about extending A1 System Monitoring Tool to allow cpu, memory, cores, and max frequency information to be processed concurrently within different processes. Terminate and stop signals from the keyboard are processed differently to match the use case of the program.
 
@@ -87,11 +82,23 @@ __Test Cases__ <br />
 ./myMonitoringTool --memory --memory --cpu --memory will display the memory and cpu graphs with samples=20 and tdelay=500000 because repeated arguments are allowed <br />
 
 __Notes__ <br />
-PID argument is a positional argument and should be the first arg if used <br />
-If no arguments are given then the output is the composite table <br />
-When compiling with std=c99, readlink gives an error saying implicit declaration, so after looking at https://man7.org/linux/man-pages/man2/readlink.2.html, I found that readlink() requires _POSIX_C_SOURCE >= 200112L and after researching I found https://stackoverflow.com/questions/66862654/why-does-my-compiler-think-my-readlink-is-implicitly-declared-if-i-set-the-sta where I found a POSIX c source which worked for compiling so I included -D_POSIX_C_SOURCE=200809L in my makefile since 2008 >= 2001 <br />
-I found the maximum path length through https://stackoverflow.com/questions/9449241/where-is-path-max-defined-in-linux and
-defined a constant variable PATH_MAX to be 4096 <br />
+Memory utilization was calculated using <sys/sysinfo.h>, namely using variables totalram and freeram of struct sysinfo.<br />
+Used ram is equal to totalram - freeram. 
+
+Number of CPUs was calculated by going to /sys/devices/system/cpu and iterating through the cpu0, cpu1, ..., <br />
+located there to find the max cpu number.<br />
+
+Max frequency was calculated by reading the value stored at<br />
+/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq and converting from Khz to Ghz.<br />
+
+To add the tdelay between each sample, usleep() was utilized.<br />
+There was a warning when compiling with -std=c99 so added #define _DEFAULT_SOURCE<br />
+as stated in https://man7.org/linux/man-pages/man3/usleep.3.html.<br />
+
+Escape codes were utilized to clear the screen and position the cursor to the right position for printing.<br />
+
+https://man7.org/linux/man-pages/man2/sigaction.2.html set sa_handler to SIG_IGN so that when sigaction() is called with SIGTSTP, the stop signal is ignored. <br />
+https://www.ibm.com/docs/en/zos/2.4.0?topic=functions-kill-send-signal-process found if pid is equal to 0, then kill sends its signal to all processes with the same process group ID as the sender. In my implementation, only the parent process will be calling the particular signal handling function so by saying kill(0, signal) I am able to send signal to the child processes since child processes have the same pgid which can be observed through calling 'ps xao pid,ppid,pgid,comm'. <br />
 
 __References__ <br />
 https://man7.org/linux/man-pages/man5/proc.5.html <br />
