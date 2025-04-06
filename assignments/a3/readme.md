@@ -101,13 +101,8 @@ https://man7.org/linux/man-pages/man2/sigaction.2.html set sa_handler to SIG_IGN
 https://www.ibm.com/docs/en/zos/2.4.0?topic=functions-kill-send-signal-process found if pid is equal to 0, then kill sends its signal to all processes with the same process group ID as the sender. In my implementation, only the parent process will be calling the particular signal handling function so by saying kill(0, signal) I am able to send signal to the child processes since child processes have the same pgid which can be observed through calling 'ps xao pid,ppid,pgid,comm'. <br />
 
 __References__ <br />
-https://man7.org/linux/man-pages/man5/proc.5.html <br />
-https://man7.org/linux/man-pages/man0/sys_types.h.0p.html <br />
-https://www.man7.org/linux/man-pages/man0/sys_stat.h.0p.html <br />
-https://pubs.opengroup.org/onlinepubs/7908799/xsh/dirent.h.html <br />
-https://pubs.opengroup.org/onlinepubs/7908799/xsh/unistd.h.html <br />
-https://www.group-ib.com/blog/linux-pro-manipulation/ <br />
-https://pubs.opengroup.org/onlinepubs/7908799/xsh/readlink.html <br />
-https://man7.org/linux/man-pages/man2/readlink.2.html <br />
-https://stackoverflow.com/questions/66862654/why-does-my-compiler-think-my-readlink-is-implicitly-declared-if-i-set-the-sta <br />
-https://stackoverflow.com/questions/9449241/where-is-path-max-defined-in-linux <br />
+https://man7.org/linux/man-pages/man3/usleep.3.html
+https://man7.org/linux/man-pages/man2/sysinfo.2.html
+https://man7.org/linux/man-pages/man2/sigaction.2.html
+https://www.ibm.com/docs/en/zos/2.4.0?topic=functions-kill-send-signal-process
+https://man7.org/linux/man-pages/man5/proc_cpuinfo.5.html
