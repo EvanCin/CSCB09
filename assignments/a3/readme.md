@@ -71,8 +71,20 @@ When running the program, if ctrl-z is input by user, it is ignored and the prog
 When running the program, if ctrl-c is input by user, the graphs should stop displaying new values and wait for user input. If user inputs 'r', then continue execution of the program and continue displaying graph values. If user inputs anything other than 'r', then terminate the program.
 
 __Test Cases__ <br />
-Running with invalid/inaccessible pid gives the error message: FD directory of PID [pid] is not accessible <br />
-Running with invalid arguments gives error message: Invalid argument, input should be of form: ./showFDtables [pid] [--per-process] [--systemWide] [--Vnodes] [--composite] [--summary] [--threshold=X] <br />
+./myMonitoringTool displays the memory, cpu, and cores and max frequency info, with samples=20, tdelay=500000 <br />
+./myMonitoringTool 30 displays the memory, cpu, and cores and max frequency info, with samples=30, tdelay=500000 <br />
+./myMonitoringTool 40 1000000 displays the memory, cpu, and cores and max frequency info, with samples=40, tdelay=1000000 <br />
+./myMonitoringTool -1 1000000 exits the program and prints a message telling the user the proper syntax because samples>=0 <br />
+./myMonitoringTool 30 -1 exits the program and prints a message telling the user the proper syntax because tdelay>=0 <br />
+./myMonitoringTool --memory displays the memory graph with samples=20, tdelay=500000 <br />
+./myMonitoringTool --cpu --cores displays the cpu graph and cores and max freq info with samples=20, tdelay=500000 <br />
+./myMonitoringTool 30 100000 --cpu --memory displays the cpu and memory graphs with samples=30, tdelay=100000 <br />
+./myMonitoringTool 30 100000 --cpu 10 exits the program and prints a message telling the user the proper syntax because samples and tdelay have to be the first two input args. <br />
+./myMonitoringTool --tdelay=100000 --cpu displays the cpu graph with samples=20, tdelay=100000 <br />
+./myMonitoringTool --tdelay = 100000 exits the program and prints a message telling the user the proper syntax because there should no spaces for the tdelay argument (should be --tdelay=100000) <br />
+./myMonitoringTool --samples = 30 exits the program and prints a message telling the user the proper syntax because there should no spaces for the samples argument (should be --samples=30) <br />
+./myMonitoringTool 30 100000 --tdelay=200000 --memory will display the memory graph with samples=30 and tdelay=200000 because the rightmost values are used <br />
+./myMonitoringTool --memory --memory --cpu --memory will display the memory and cpu graphs with samples=20 and tdelay=500000 because repeated arguments are allowed <br />
 
 __Notes__ <br />
 PID argument is a positional argument and should be the first arg if used <br />
