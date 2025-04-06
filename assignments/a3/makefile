@@ -1,5 +1,5 @@
 CC = gcc
-CCFLAGS = -std=c99 -Wall -Werror -D_POSIX_C_SOURCE=200809L
+CCFLAGS = -std=c99 -Wall -Werror
 
 all: myMonitoringTool
 
