@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 		} else {
 			updateVal = updateValues(&samples, &tdelay, &displayMemory, &displayCPU, &displayCore, argv[1]);
 			if(updateVal == -1) {
-				printf("Wrong arguments. Syntax: ./myMonitoringTool  [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T]");
+				printf("Wrong arguments. Syntax: ./myMonitoringTool  [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T]\n");
 				exit(1);
 			}
 		}
@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
 	for(int i = commandIndex; i < argc; i++) {
 		updateVal = updateValues(&samples, &tdelay, &displayMemory, &displayCPU, &displayCore, argv[i]);
 		if(updateVal == -1) {
-			printf("Wrong arguments. Syntax: ./myMonitoringTool  [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T]");
+			printf("Wrong arguments. Syntax: ./myMonitoringTool  [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T]\n");
 			exit(1);
 		}
 	}

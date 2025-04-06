@@ -8,7 +8,6 @@ myMonitoringTool: computations.o display.o processControl.o signals.o main.o
 
 main.o: main.c
 	${CC} ${CCFLAGS} -c main.c
-
 %.o: %.c
 	${CC} ${CCFLAGS} -c $<
 
